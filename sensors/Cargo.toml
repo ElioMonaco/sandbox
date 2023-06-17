@@ -1,0 +1,16 @@
+[package]
+name = "coreutils_rust"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[[bin]]
+name = "sensors"
+path = "src/main.rs"
+
+[dependencies]
+anyhow = "1.0"
+log = "0.4.17"
+simple-logging = "2.0.2"
+sysinfo = "0.29.2"
