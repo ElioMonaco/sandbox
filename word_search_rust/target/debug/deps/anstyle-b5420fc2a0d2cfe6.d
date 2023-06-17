@@ -1,0 +1,12 @@
+C:\Users\monac\git\sandbox\sandbox\word_search_rust\target\debug\deps\anstyle-b5420fc2a0d2cfe6.rmeta: C:\Users\monac\.cargo\registry\src\github.com-1ecc6299db9ec823\anstyle-1.0.0\src\lib.rs C:\Users\monac\.cargo\registry\src\github.com-1ecc6299db9ec823\anstyle-1.0.0\src\macros.rs C:\Users\monac\.cargo\registry\src\github.com-1ecc6299db9ec823\anstyle-1.0.0\src\color.rs C:\Users\monac\.cargo\registry\src\github.com-1ecc6299db9ec823\anstyle-1.0.0\src\effect.rs C:\Users\monac\.cargo\registry\src\github.com-1ecc6299db9ec823\anstyle-1.0.0\src\reset.rs C:\Users\monac\.cargo\registry\src\github.com-1ecc6299db9ec823\anstyle-1.0.0\src\style.rs
+
+C:\Users\monac\git\sandbox\sandbox\word_search_rust\target\debug\deps\libanstyle-b5420fc2a0d2cfe6.rlib: C:\Users\monac\.cargo\registry\src\github.com-1ecc6299db9ec823\anstyle-1.0.0\src\lib.rs C:\Users\monac\.cargo\registry\src\github.com-1ecc6299db9ec823\anstyle-1.0.0\src\macros.rs C:\Users\monac\.cargo\registry\src\github.com-1ecc6299db9ec823\anstyle-1.0.0\src\color.rs C:\Users\monac\.cargo\registry\src\github.com-1ecc6299db9ec823\anstyle-1.0.0\src\effect.rs C:\Users\monac\.cargo\registry\src\github.com-1ecc6299db9ec823\anstyle-1.0.0\src\reset.rs C:\Users\monac\.cargo\registry\src\github.com-1ecc6299db9ec823\anstyle-1.0.0\src\style.rs
+
+C:\Users\monac\git\sandbox\sandbox\word_search_rust\target\debug\deps\anstyle-b5420fc2a0d2cfe6.d: C:\Users\monac\.cargo\registry\src\github.com-1ecc6299db9ec823\anstyle-1.0.0\src\lib.rs C:\Users\monac\.cargo\registry\src\github.com-1ecc6299db9ec823\anstyle-1.0.0\src\macros.rs C:\Users\monac\.cargo\registry\src\github.com-1ecc6299db9ec823\anstyle-1.0.0\src\color.rs C:\Users\monac\.cargo\registry\src\github.com-1ecc6299db9ec823\anstyle-1.0.0\src\effect.rs C:\Users\monac\.cargo\registry\src\github.com-1ecc6299db9ec823\anstyle-1.0.0\src\reset.rs C:\Users\monac\.cargo\registry\src\github.com-1ecc6299db9ec823\anstyle-1.0.0\src\style.rs
+
+C:\Users\monac\.cargo\registry\src\github.com-1ecc6299db9ec823\anstyle-1.0.0\src\lib.rs:
+C:\Users\monac\.cargo\registry\src\github.com-1ecc6299db9ec823\anstyle-1.0.0\src\macros.rs:
+C:\Users\monac\.cargo\registry\src\github.com-1ecc6299db9ec823\anstyle-1.0.0\src\color.rs:
+C:\Users\monac\.cargo\registry\src\github.com-1ecc6299db9ec823\anstyle-1.0.0\src\effect.rs:
+C:\Users\monac\.cargo\registry\src\github.com-1ecc6299db9ec823\anstyle-1.0.0\src\reset.rs:
+C:\Users\monac\.cargo\registry\src\github.com-1ecc6299db9ec823\anstyle-1.0.0\src\style.rs:

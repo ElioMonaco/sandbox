@@ -1,0 +1,11 @@
+C:\Users\monac\git\sandbox\sandbox\word_search_rust\target\debug\deps\anstyle_wincon-99554ab6dbd46376.rmeta: C:\Users\monac\.cargo\registry\src\github.com-1ecc6299db9ec823\anstyle-wincon-1.0.1\src\lib.rs C:\Users\monac\.cargo\registry\src\github.com-1ecc6299db9ec823\anstyle-wincon-1.0.1\src\console.rs C:\Users\monac\.cargo\registry\src\github.com-1ecc6299db9ec823\anstyle-wincon-1.0.1\src\lockable.rs C:\Users\monac\.cargo\registry\src\github.com-1ecc6299db9ec823\anstyle-wincon-1.0.1\src\stream.rs C:\Users\monac\.cargo\registry\src\github.com-1ecc6299db9ec823\anstyle-wincon-1.0.1\src\windows.rs
+
+C:\Users\monac\git\sandbox\sandbox\word_search_rust\target\debug\deps\libanstyle_wincon-99554ab6dbd46376.rlib: C:\Users\monac\.cargo\registry\src\github.com-1ecc6299db9ec823\anstyle-wincon-1.0.1\src\lib.rs C:\Users\monac\.cargo\registry\src\github.com-1ecc6299db9ec823\anstyle-wincon-1.0.1\src\console.rs C:\Users\monac\.cargo\registry\src\github.com-1ecc6299db9ec823\anstyle-wincon-1.0.1\src\lockable.rs C:\Users\monac\.cargo\registry\src\github.com-1ecc6299db9ec823\anstyle-wincon-1.0.1\src\stream.rs C:\Users\monac\.cargo\registry\src\github.com-1ecc6299db9ec823\anstyle-wincon-1.0.1\src\windows.rs
+
+C:\Users\monac\git\sandbox\sandbox\word_search_rust\target\debug\deps\anstyle_wincon-99554ab6dbd46376.d: C:\Users\monac\.cargo\registry\src\github.com-1ecc6299db9ec823\anstyle-wincon-1.0.1\src\lib.rs C:\Users\monac\.cargo\registry\src\github.com-1ecc6299db9ec823\anstyle-wincon-1.0.1\src\console.rs C:\Users\monac\.cargo\registry\src\github.com-1ecc6299db9ec823\anstyle-wincon-1.0.1\src\lockable.rs C:\Users\monac\.cargo\registry\src\github.com-1ecc6299db9ec823\anstyle-wincon-1.0.1\src\stream.rs C:\Users\monac\.cargo\registry\src\github.com-1ecc6299db9ec823\anstyle-wincon-1.0.1\src\windows.rs
+
+C:\Users\monac\.cargo\registry\src\github.com-1ecc6299db9ec823\anstyle-wincon-1.0.1\src\lib.rs:
+C:\Users\monac\.cargo\registry\src\github.com-1ecc6299db9ec823\anstyle-wincon-1.0.1\src\console.rs:
+C:\Users\monac\.cargo\registry\src\github.com-1ecc6299db9ec823\anstyle-wincon-1.0.1\src\lockable.rs:
+C:\Users\monac\.cargo\registry\src\github.com-1ecc6299db9ec823\anstyle-wincon-1.0.1\src\stream.rs:
+C:\Users\monac\.cargo\registry\src\github.com-1ecc6299db9ec823\anstyle-wincon-1.0.1\src\windows.rs:
