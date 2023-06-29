@@ -1,33 +1,54 @@
-//use sysinfo::{NetworkExt, NetworksExt, ProcessExt, System, SystemExt};
-use sysinfo::{System, SystemExt, CpuExt};
-use log::LevelFilter;
-use log::{info, warn};
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")] // hide console window on Windows in release
 
-fn main() {
-    simple_logging::log_to_file("test.log", LevelFilter::Info);
-    log::info!("Collecting system information.");
-    let mut sys = System::new_all();
+use eframe::egui;
 
-    
+fn main() -> Result<(), eframe::Error> {
+    env_logger::init(); // Log to stderr (if you run with `RUST_LOG=debug`).
+    let options: eframe = eframe::NativeOptions {
+        initial_window_size: Some(egui::vec2(220.0, 140.0)),
+        ..Default::default()
+    };
+    eframe::run_native(
+        "Confirm exit",
+        options,
+        Box::new(|_cc| Box::<MyApp>::default()),
+    )
+}
 
-    println!("=> components:");
-    for component in sys.components() {
-        println!("{:?}", component);
+#[derive(Default)]
+struct MyApp {
+    allowed_to_close: bool,
+    show_confirmation_dialog: bool,
+}
+
+impl eframe::App for MyApp {
+    fn on_close_event(&mut self) -> bool {
+        self.show_confirmation_dialog = true;
+        self.allowed_to_close
     }
-    
-    let total_ram: f64 = sys.total_memory() as f64;
-    let used_ram: f64 = sys.used_memory() as f64;
-    // RAM and swap information:
-    println!("total memory: {} Gigabytes", total_ram / 1000000000.000);
-    println!("used memory : {} Gigabytes", used_ram / 1000000000.000);
-    // println!("total swap  : {} bytes", sys.total_swap());
-    // println!("used swap   : {} bytes", sys.used_swap());
 
-    // loop {
-    //     sys.refresh_cpu(); // Refreshing CPU information.
-    //     for cpu in sys.cpus() {
-    //         print!("{}% ", cpu.cpu_usage());
-    //     }
-    //     std::thread::sleep(std::time::Duration::from_millis(500));
-    // }
+    fn update(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
+        egui::CentralPanel::default().show(ctx, |ui| {
+            ui.heading("Try to close the window");
+        });
+
+        if self.show_confirmation_dialog {
+            // Show confirmation dialog:
+            egui::Window::new("Do you want to quit?")
+                .collapsible(false)
+                .resizable(false)
+                .show(ctx, |ui| {
+                    ui.horizontal(|ui| {
+                        if ui.button("Cancel").clicked() {
+                            self.show_confirmation_dialog = false;
+                        }
+
+                        if ui.button("Yes!").clicked() {
+                            self.allowed_to_close = true;
+                            frame.close();
+                        }
+                    });
+                });
+        }
+    }
 }
