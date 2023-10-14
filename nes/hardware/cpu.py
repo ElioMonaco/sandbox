@@ -2,6 +2,7 @@
 
 """Emulation of the MOT-6502 Processor."""
 import memory
+import sys
 
 class Processor:
     """MOT-6502 Processor."""
@@ -61,3 +62,29 @@ class Processor:
         """
         self.memory[address] = value
         self.cycles += 1
+    
+    def read_word(self, address: int) -> int:
+        """Read a word from memory.
+
+        :param address: The address to read from
+        :return: int
+        """
+        if sys.byteorder == "little":
+            data = self.read_byte(address) | (self.read_byte(address + 1) << 8)
+        else:
+            data = (self.read_byte(address) << 8) | self.read_byte(address + 1)
+        return data
+    
+    def write_word(self, address: int, value: int) -> None:
+        """Split a word to two bytes and write to memory.
+
+        :param address: The address to write to
+        :param value: The value to write
+        :return: None
+        """
+        if sys.byteorder == "little":
+            self.write_byte(address, value & 0xFF)
+            self.write_byte(address + 1, (value >> 8) & 0xFF)
+        else:
+            self.write_byte(address, (value >> 8) & 0xFF)
+            self.write_byte(address + 1, value & 0xFF)
