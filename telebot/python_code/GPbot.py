@@ -21,7 +21,7 @@ def send_welcome(message):
     if messages["command_messages"]["scrape"]:
         f = open(str(datetime.datetime.now().year)+"_"+str(datetime.datetime.now().month)+"_"+str(datetime.datetime.now().day)+"_GPbot_logs",'a')
         
-        f.write("["+str(pd.Timestamp.now())+"]: begin trnsaction for message "+str(message.json['message_id'])+" from user "+str(message.from_user.id)+" from chat "+str(message.chat.id)+". Logs from command function.\n")
+        f.write("["+str(pd.Timestamp.now())+"]: begin transaction for message "+str(message.json['message_id'])+" from user "+str(message.from_user.id)+" from chat "+str(message.chat.id)+". Logs from command function.\n")
         f.write("["+str(pd.Timestamp.now())+"]: appending user to staging...\n")
         message_user = pd.DataFrame([[message.chat.id
                                                        ,message.from_user.id
@@ -150,6 +150,8 @@ def send_welcome(message):
         message_item.insert(7, "forward_from_user", forward_from_item, True)
         forward_timestamp_item = message.json["forward_date"] if "forward_date" in message.json else None
         message_item.insert(8, "forward_timestamp", forward_timestamp_item, True)
+        reply_item = message.json["reply_to_message"]["message_id"] if "reply_to_message" in message.json else None
+        message_item.insert(9, "reply_to_message", reply_item, True)
         message_item.to_sql(name = 'messages', con = sql_engine, if_exists = 'append', index=False)
         
         if "entities" in message.json:
@@ -199,7 +201,7 @@ def scrape_message(message):
     if messages["command_messages"]["scrape"]:
         f = open(str(datetime.datetime.now().year)+"_"+str(datetime.datetime.now().month)+"_"+str(datetime.datetime.now().day)+"_GPbot_logs",'a')
         
-        f.write("["+str(pd.Timestamp.now())+"]: begin trnsaction for message "+str(message.json['message_id'])+" from user "+str(message.from_user.id)+" from chat "+str(message.chat.id)+". Logs from scraper function.\n")
+        f.write("["+str(pd.Timestamp.now())+"]: begin transaction for message "+str(message.json['message_id'])+" from user "+str(message.from_user.id)+" from chat "+str(message.chat.id)+". Logs from scraper function.\n")
         f.write("["+str(pd.Timestamp.now())+"]: appending user to staging...\n")
         message_user = pd.DataFrame([[message.chat.id
                                                        ,message.from_user.id
@@ -328,6 +330,8 @@ def scrape_message(message):
         message_item.insert(7, "forward_from_user", forward_from_item, True)
         forward_timestamp_item = message.json["forward_date"] if "forward_date" in message.json else None
         message_item.insert(8, "forward_timestamp", forward_timestamp_item, True)
+        reply_item = message.json["reply_to_message"]["message_id"] if "reply_to_message" in message.json else None
+        message_item.insert(9, "reply_to_message", reply_item, True)
         message_item.to_sql(name = 'messages', con = sql_engine, if_exists = 'append', index=False)
         
         if "entities" in message.json:
