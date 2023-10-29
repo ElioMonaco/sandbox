@@ -7,7 +7,7 @@ commands = list(messages["command_messages"].keys())
 dataframe_types = pd.read_sql('SELECT * FROM telegram.message_types', sql_engine)
 message_types = list(dataframe_types["message_type"])
 
-@bot.message_handler(commands = commands) #(func = lambda message: True)
+@bot.message_handler(commands = commands)
 def send_welcome(message):
     command_received = message.text.replace("/", "")
     if command_received != "scrape":
