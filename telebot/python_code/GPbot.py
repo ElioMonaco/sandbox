@@ -6,7 +6,6 @@ bot = telebot.TeleBot(general_purpose)
 commands = list(messages["command_messages"].keys())
 dataframe_types = pd.read_sql('SELECT * FROM telegram.message_types', sql_engine)
 message_types = list(dataframe_types["message_type"])
-f = open(str(datetime.datetime.now().year)+"_"+str(datetime.datetime.now().month)+"_"+str(datetime.datetime.now().day)+"_"+str(datetime.datetime.now().hour)+"_GPbot_logs",'w')
 
 @bot.message_handler(commands = commands) #(func = lambda message: True)
 def send_welcome(message):
@@ -20,7 +19,7 @@ def send_welcome(message):
         bot.reply_to(message, reply)  
 
     if messages["command_messages"]["scrape"]:
-        f = open(str(datetime.datetime.now().year)+"_"+str(datetime.datetime.now().month)+"_"+str(datetime.datetime.now().day)+"_"+str(datetime.datetime.now().hour)+"_GPbot_logs",'a')
+        f = open(str(datetime.datetime.now().year)+"_"+str(datetime.datetime.now().month)+"_"+str(datetime.datetime.now().day)+"_GPbot_logs",'a')
         
         f.write("["+str(pd.Timestamp.now())+"]: begin trnsaction for message "+str(message.json['message_id'])+" from user "+str(message.from_user.id)+" from chat "+str(message.chat.id)+". Logs from command function.\n")
         f.write("["+str(pd.Timestamp.now())+"]: appending user to staging...\n")
@@ -145,8 +144,12 @@ def send_welcome(message):
                                                     ,"insert_time"
                                                    ])
         
-        if "text" in message.json:
-            message_item.insert(5, "text", message.json["text"], True)
+        text_item = message.json["text"] if "text" in message.json else None
+        message_item.insert(5, "text", text_item, True)
+        forward_from_item = message.json["forward_from"]["id"] if "forward_from" in message.json else None
+        message_item.insert(7, "forward_from_user", forward_from_item, True)
+        forward_timestamp_item = message.json["forward_date"] if "forward_date" in message.json else None
+        message_item.insert(8, "forward_timestamp", forward_timestamp_item, True)
         message_item.to_sql(name = 'messages', con = sql_engine, if_exists = 'append', index=False)
         
         if "entities" in message.json:
@@ -194,7 +197,7 @@ def send_welcome(message):
 @bot.message_handler(content_types = message_types)
 def scrape_message(message):
     if messages["command_messages"]["scrape"]:
-        f = open(str(datetime.datetime.now().year)+"_"+str(datetime.datetime.now().month)+"_"+str(datetime.datetime.now().day)+"_"+str(datetime.datetime.now().hour)+"_GPbot_logs",'a')
+        f = open(str(datetime.datetime.now().year)+"_"+str(datetime.datetime.now().month)+"_"+str(datetime.datetime.now().day)+"_GPbot_logs",'a')
         
         f.write("["+str(pd.Timestamp.now())+"]: begin trnsaction for message "+str(message.json['message_id'])+" from user "+str(message.from_user.id)+" from chat "+str(message.chat.id)+". Logs from scraper function.\n")
         f.write("["+str(pd.Timestamp.now())+"]: appending user to staging...\n")
@@ -319,12 +322,12 @@ def scrape_message(message):
                                                     ,"insert_time"
                                                    ])
         
-        if "text" in message.json:
-            message_item.insert(5, "text", message.json["text"], True)
-        if "forward_from" in message.json:
-            message_item.insert(6, "forward_from_user", message.json["forward_from"]["id"], True)
-        if "forward_date" in message.json:
-            message_item.insert(7, "forward_timestamp", message.json["forward_date"], True)
+        text_item = message.json["text"] if "text" in message.json else None
+        message_item.insert(5, "text", text_item, True)
+        forward_from_item = message.json["forward_from"]["id"] if "forward_from" in message.json else None
+        message_item.insert(7, "forward_from_user", forward_from_item, True)
+        forward_timestamp_item = message.json["forward_date"] if "forward_date" in message.json else None
+        message_item.insert(8, "forward_timestamp", forward_timestamp_item, True)
         message_item.to_sql(name = 'messages', con = sql_engine, if_exists = 'append', index=False)
         
         if "entities" in message.json:
@@ -403,4 +406,3 @@ for i in range(1000):
         bot.infinity_polling()
     except:
         bot.infinity_polling()
-
