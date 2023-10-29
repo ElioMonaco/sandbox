@@ -321,6 +321,10 @@ def scrape_message(message):
         
         if "text" in message.json:
             message_item.insert(5, "text", message.json["text"], True)
+        if "forward_from" in message.json:
+            message_item.insert(6, "forward_from_user", message.json["forward_from"]["id"], True)
+        if "forward_date" in message.json:
+            message_item.insert(7, "forward_timestamp", message.json["forward_date"], True)
         message_item.to_sql(name = 'messages', con = sql_engine, if_exists = 'append', index=False)
         
         if "entities" in message.json:
@@ -361,6 +365,34 @@ def scrape_message(message):
                                                     ,"insert_time"
                                                    ])
             message_audio.to_sql(name = 'message_audios', con = sql_engine, if_exists = 'append', index=False)
+        
+        if "video" in message.json:
+            message_video = pd.DataFrame([[message.json['message_id']
+                                        ,message.json["chat"]["id"]
+                                        ,message.video.file_id
+                                        ,message.video.file_unique_id
+                                        ,message.video.width
+                                        ,message.video.height
+                                        ,message.video.duration
+                                        ,message.video.file_name
+                                        ,message.video.mime_type
+                                        ,message.video.file_size
+                                        ,pd.Timestamp.utcnow()  
+                                      ]]
+                                              ,columns = [
+                                                  "message_id"
+                                                    ,"chat_id"
+                                                    ,"file_id"
+                                                    ,"file_unique_id"
+                                                    ,"width"
+                                                    ,"height"
+                                                    ,"duration"
+                                                    ,"file_name"
+                                                    ,"mime_type"
+                                                    ,"file_size"
+                                                    ,"insert_time"
+                                                   ])
+            message_video.to_sql(name = 'message_videos', con = sql_engine, if_exists = 'append', index=False)
         f.write("["+str(pd.Timestamp.now())+"]: done\n")
         f.write("=====================================================================================================\n")
         f.close()
