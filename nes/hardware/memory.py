@@ -1,4 +1,4 @@
-# copied or adapted from https://dailystuff.nl/projects/writing-a-6502-emulator-in-python
+# copied or adapted from https://github.com/hspaans/python-6502-emulator/tree/master
 
 import numpy as np
 
