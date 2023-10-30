@@ -1,0 +1,21 @@
+CREATE TABLE `message_stickers` (
+  `ID` int NOT NULL AUTO_INCREMENT,
+  `message_id` bigint DEFAULT NULL,
+  `chat_id` bigint DEFAULT NULL,
+  `file_id` text,
+  `file_unique_id` text,
+  `type` text,
+  `width` bigint DEFAULT NULL,
+  `height` bigint DEFAULT NULL,
+  `is_animated` tinyint(1) DEFAULT NULL,
+  `is_video` tinyint(1) DEFAULT NULL,
+  `emoji` text,
+  `set_name` text,
+  `mask_position` text,
+  `file_size` bigint DEFAULT NULL,
+  `premium_animation` text,
+  `custom_emoji_id` text,
+  `needs_repainting` text,
+  `insert_time` datetime NOT NULL,
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
