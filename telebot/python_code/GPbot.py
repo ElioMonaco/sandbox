@@ -1,7 +1,6 @@
 from bot_config import *
 
 sql_engine = define_connector(user_db, passw_db, host_db, port_db, schema_db)
-current_time = get_current_unix()
 bot = telebot.TeleBot(general_purpose)
 commands = list(messages["command_messages"].keys())
 dataframe_types = pd.read_sql('SELECT * FROM telegram.message_types', sql_engine)
