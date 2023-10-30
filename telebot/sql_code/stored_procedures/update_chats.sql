@@ -1,9 +1,9 @@
 CREATE DEFINER=`root`@`localhost` PROCEDURE `update_chats`()
 BEGIN
-	SET @changed_chat = (SELECT COUNT(*) 
+	SET @changed_chat = (SELECT COUNT(*)
 							FROM telegram.chats AS c
                             INNER JOIN telegram.chats_staging AS s
-                            ON c.chat_id = s.chat_id 
+                            ON c.chat_id = s.chat_id
                             WHERE c.type <> s.type
 									OR c.title <> s.title
 									OR c.username <> s.username
@@ -32,24 +32,25 @@ BEGIN
 									OR c.has_hidden_members <> s.has_hidden_members
 									OR c.has_aggressive_anti_spam_enabled <> s.has_aggressive_anti_spam_enabled
 									OR c.emoji_status_expiration_date <> s.emoji_status_expiration_date);
-	
-    SET @same_chat = (SELECT COUNT(*) 
+
+    SET @same_chat = (SELECT COUNT(*)
 							FROM telegram.chats AS c
                             INNER JOIN telegram.chats_staging AS s
                             ON c.chat_id = s.chat_id);
-	
-    SET @time_bridge = (SELECT UTC_TIMESTAMP());	
+
+    SET @time_bridge = (SELECT UTC_TIMESTAMP());
     IF @changed_chat = 1 THEN
-    
+
 		UPDATE telegram.chats AS c
         INNER JOIN telegram.chats_staging AS s
         ON c.chat_id = s.chat_id
-        SET c.valid_to = @time_bridge;
-	
+        SET c.valid_to = @time_bridge
+        WHERE c.valid_to IS NULL;
+
     END IF;
-    
+
     IF @changed_chat = 1 OR @same_chat = 0 THEN
-    
+
 		INSERT INTO telegram.chats (chat_id
 									,type
 									,title
@@ -112,9 +113,9 @@ BEGIN
 				,emoji_status_expiration_date
 				,@time_bridge AS valid_from
 				,NULL AS valid_to
-		FROM telegram.chats_staging; 
-        
+		FROM telegram.chats_staging;
+
 	END IF;
-    
+
     TRUNCATE TABLE `telegram`.`chats_staging`;
 END

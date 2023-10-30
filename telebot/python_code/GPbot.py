@@ -24,6 +24,18 @@ def send_welcome(message):
             f = open(str(datetime.datetime.now().year)+"_"+str(datetime.datetime.now().month)+"_"+str(datetime.datetime.now().day)+"_GPbot_logs",'a')
             
             f.write("["+str(pd.Timestamp.now())+"]: begin transaction for message "+str(message.json['message_id'])+" from user "+str(message.from_user.id)+" from chat "+str(message.chat.id)+". Logs from command function.\n")
+            
+            f.write("["+str(pd.Timestamp.now())+"]: appending raw message to database...\n")
+            raw_message = pd.DataFrame([[str(message)
+                                            ,pd.Timestamp.utcnow()  
+                                        ]]
+                                                ,columns = [
+                                                    "message"
+                                                        ,"insert_time"
+                                                    ])
+            raw_message.to_sql(name = 'raw_messages', con = sql_engine, if_exists = 'append', index=False)
+            f.write("["+str(pd.Timestamp.now())+"]: done\n")
+
             f.write("["+str(pd.Timestamp.now())+"]: appending user to staging...\n")
             message_user = pd.DataFrame([[message.chat.id
                                                         ,message.from_user.id
@@ -146,7 +158,12 @@ def send_welcome(message):
                                                         ,"insert_time"
                                                     ])
             
-            text_item = message.json["text"] if "text" in message.json else None
+            if "text" in message.json:
+                text_item = message.json["text"] 
+            elif "pinned_message" in message.json and "text" in message.json["pinned_message"]:
+                text_item = message.json["pinned_message"]["text"]
+            else: 
+                text_item = None
             message_item.insert(5, "text", text_item, True)
             forward_from_item = message.json["forward_from"]["id"] if "forward_from" in message.json else None
             message_item.insert(7, "forward_from_user", forward_from_item, True)
@@ -163,37 +180,6 @@ def send_welcome(message):
                 message_entity.insert(5, "insert_time", [pd.Timestamp.utcnow() for i in range(len(message.json["entities"]))], True)
                 message_entity.to_sql(name = 'message_entities', con = sql_engine, if_exists = 'append', index=False)
 
-            if "photo" in message.json:
-                message_photo = pd.DataFrame.from_dict(message.json["photo"], orient = "columns")
-                message_photo.insert(0, "message_id", [message.json["message_id"] for i in range(len(message.json["photo"]))], True)
-                message_photo.insert(1, "chat_id", [message.json["chat"]["id"] for i in range(len(message.json["photo"]))], True)
-                caption = message.json["caption"] if "caption" in message.json else None
-                message_photo.insert(2, "caption", [caption for i in range(len(message.json["photo"]))], True)
-                message_photo.insert(7, "insert_time", [pd.Timestamp.utcnow() for i in range(len(message.json["photo"]))], True)
-                message_photo.to_sql(name = 'message_photos', con = sql_engine, if_exists = 'append', index=False)
-                
-            if "voice" in message.json:
-                
-                message_audio = pd.DataFrame([[message.json['message_id']
-                                            ,message.json["chat"]["id"]
-                                            ,message.json["voice"]["duration"]
-                                            ,message.json["voice"]["mime_type"]
-                                            ,message.json["voice"]["file_id"]
-                                            ,message.json["voice"]["file_unique_id"]
-                                            ,message.json["voice"]["file_size"]
-                                            ,pd.Timestamp.utcnow()  
-                                        ]]
-                                                ,columns = [
-                                                    "message_id"
-                                                        ,"chat_id"
-                                                        ,"duration"
-                                                        ,"mime_type"
-                                                        ,"file_id"
-                                                        ,"file_unique_id"
-                                                        ,"file_size"
-                                                        ,"insert_time"
-                                                    ])
-                message_audio.to_sql(name = 'message_audios', con = sql_engine, if_exists = 'append', index=False)
             f.write("["+str(pd.Timestamp.now())+"]: done\n")
             f.write("=====================================================================================================\n")
             f.close()
@@ -205,6 +191,18 @@ def scrape_message(message):
             f = open(str(datetime.datetime.now().year)+"_"+str(datetime.datetime.now().month)+"_"+str(datetime.datetime.now().day)+"_GPbot_logs",'a')
             
             f.write("["+str(pd.Timestamp.now())+"]: begin transaction for message "+str(message.json['message_id'])+" from user "+str(message.from_user.id)+" from chat "+str(message.chat.id)+". Logs from scraper function.\n")
+            
+            f.write("["+str(pd.Timestamp.now())+"]: appending raw message to database...\n")
+            raw_message = pd.DataFrame([[str(message)
+                                            ,pd.Timestamp.utcnow()  
+                                        ]]
+                                                ,columns = [
+                                                    "message"
+                                                        ,"insert_time"
+                                                    ])
+            raw_message.to_sql(name = 'raw_messages', con = sql_engine, if_exists = 'append', index=False)
+            f.write("["+str(pd.Timestamp.now())+"]: done\n")
+            
             f.write("["+str(pd.Timestamp.now())+"]: appending user to staging...\n")
             message_user = pd.DataFrame([[message.chat.id
                                                         ,message.from_user.id
@@ -327,7 +325,14 @@ def scrape_message(message):
                                                         ,"insert_time"
                                                     ])
             
-            text_item = message.json["text"] if "text" in message.json else None
+            if "text" in message.json:
+                text_item = message.json["text"] 
+            elif "pinned_message" in message.json and "text" in message.json["pinned_message"]:
+                text_item = message.json["pinned_message"]["text"]
+            elif "new_chat_title" in message.json:
+                text_item = message.json["new_chat_title"] 
+            else: 
+                text_item = None
             message_item.insert(5, "text", text_item, True)
             forward_from_item = message.json["forward_from"]["id"] if "forward_from" in message.json else None
             message_item.insert(7, "forward_from_user", forward_from_item, True)
@@ -344,13 +349,14 @@ def scrape_message(message):
                 message_entity.insert(5, "insert_time", [pd.Timestamp.utcnow() for i in range(len(message.json["entities"]))], True)
                 message_entity.to_sql(name = 'message_entities', con = sql_engine, if_exists = 'append', index=False)
 
-            if "photo" in message.json:
-                message_photo = pd.DataFrame.from_dict(message.json["photo"], orient = "columns")
-                message_photo.insert(0, "message_id", [message.json["message_id"] for i in range(len(message.json["photo"]))], True)
-                message_photo.insert(1, "chat_id", [message.json["chat"]["id"] for i in range(len(message.json["photo"]))], True)
+            if "photo" in message.json or "new_chat_photo" in message.json:
+                photo_item = message.json["photo"] if "photo" in message.json else message.json["new_chat_photo"]
+                message_photo = pd.DataFrame.from_dict(photo_item, orient = "columns")
+                message_photo.insert(0, "message_id", [message.json["message_id"] for i in range(len(photo_item))], True)
+                message_photo.insert(1, "chat_id", [message.json["chat"]["id"] for i in range(len(photo_item))], True)
                 caption = message.json["caption"] if "caption" in message.json else None
-                message_photo.insert(2, "caption", [caption for i in range(len(message.json["photo"]))], True)
-                message_photo.insert(7, "insert_time", [pd.Timestamp.utcnow() for i in range(len(message.json["photo"]))], True)
+                message_photo.insert(2, "caption", [caption for i in range(len(photo_item))], True)
+                message_photo.insert(7, "insert_time", [pd.Timestamp.utcnow() for i in range(len(photo_item))], True)
                 message_photo.to_sql(name = 'message_photos', con = sql_engine, if_exists = 'append', index=False)
                 
             if "voice" in message.json:
@@ -403,6 +409,46 @@ def scrape_message(message):
                                                         ,"insert_time"
                                                     ])
                 message_video.to_sql(name = 'message_videos', con = sql_engine, if_exists = 'append', index=False)
+            
+            if "sticker" in message.json:
+                message_sticker = pd.DataFrame([[message.json['message_id']
+                                                ,message.json["chat"]["id"]
+                                                ,message.sticker.file_id
+                                                ,message.sticker.file_unique_id
+                                                ,message.sticker.type
+                                                ,message.sticker.width
+                                                ,message.sticker.height
+                                                ,message.sticker.is_animated
+                                                ,message.sticker.is_video
+                                                ,message.sticker.emoji
+                                                ,message.sticker.set_name
+                                                ,message.sticker.mask_position
+                                                ,message.sticker.file_size
+                                                ,message.sticker.premium_animation
+                                                ,message.sticker.custom_emoji_id
+                                                ,message.sticker.needs_repainting
+                                                ,pd.Timestamp.utcnow()  
+                                          ]]
+                                                  ,columns = [
+                                                      "message_id"
+                                                        ,"chat_id"
+                                                        ,"file_id"           
+                                                        ,"file_unique_id"    
+                                                        ,"type"              
+                                                        ,"width"             
+                                                        ,"height"            
+                                                        ,"is_animated"       
+                                                        ,"is_video"          
+                                                        ,"emoji"             
+                                                        ,"set_name"          
+                                                        ,"mask_position"     
+                                                        ,"file_size"         
+                                                        ,"premium_animation" 
+                                                        ,"custom_emoji_id"   
+                                                        ,"needs_repainting"  
+                                                        ,"insert_time"
+                                                       ])
+                message_sticker.to_sql(name = 'message_stickers', con = sql_engine, if_exists = 'append', index=False)
             f.write("["+str(pd.Timestamp.now())+"]: done\n")
             f.write("=====================================================================================================\n")
             f.close()

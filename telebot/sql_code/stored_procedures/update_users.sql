@@ -1,9 +1,9 @@
 CREATE DEFINER=`root`@`localhost` PROCEDURE `update_users`()
 BEGIN
-	SET @changed_user = (SELECT COUNT(*) 
+	SET @changed_user = (SELECT COUNT(*)
 							FROM telegram.users AS u
                             INNER JOIN telegram.users_staging AS s
-                            ON u.original_chat_id = s.original_chat_id 
+                            ON u.original_chat_id = s.original_chat_id
 								AND u.user_id = s.user_id
                             WHERE u.is_bot <> s.is_bot
 								OR u.first_name <> s.first_name
@@ -14,25 +14,26 @@ BEGIN
                                 OR u.supports_inline_queries <> s.supports_inline_queries
                                 OR u.is_premium <> s.is_premium
                                 OR u.added_to_attachment_menu <> s.added_to_attachment_menu);
-	
-    SET @same_user = (SELECT COUNT(*) 
+
+    SET @same_user = (SELECT COUNT(*)
 							FROM telegram.users AS u
                             INNER JOIN telegram.users_staging AS s
-                            ON u.original_chat_id = s.original_chat_id 
+                            ON u.original_chat_id = s.original_chat_id
 								AND u.user_id = s.user_id);
-	
-    SET @time_bridge = (SELECT UTC_TIMESTAMP());	
+
+    SET @time_bridge = (SELECT UTC_TIMESTAMP());
     IF @changed_user = 1 THEN
-    
+
 		UPDATE telegram.users AS u
         INNER JOIN telegram.users_staging AS s
         ON u.original_chat_id = s.original_chat_id AND u.user_id = s.user_id
-        SET u.valid_to = @time_bridge;
-	
+        SET u.valid_to = @time_bridge
+        WHERE u.valid_to IS NULL;
+
     END IF;
-    
+
     IF @changed_user = 1 OR @same_user = 0 THEN
-    
+
 		INSERT INTO telegram.users (original_chat_id
 									,user_id
 									,is_bot
@@ -61,10 +62,10 @@ BEGIN
 				,added_to_attachment_menu
 				,@time_bridge AS valid_from
 				,NULL AS valid_to
-		FROM telegram.users_staging; 
-        
+		FROM telegram.users_staging;
+
 	END IF;
-    
+
     TRUNCATE TABLE `telegram`.`users_staging`;
-	
+
 END
