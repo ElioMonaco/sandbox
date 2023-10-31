@@ -331,6 +331,8 @@ def scrape_message(message):
                 text_item = message.json["pinned_message"]["text"]
             elif "new_chat_title" in message.json:
                 text_item = message.json["new_chat_title"] 
+            elif "caption" in message.json:
+                text_item = message.json["caption"] 
             else: 
                 text_item = None
             message_item.insert(5, "text", text_item, True)
