@@ -358,6 +358,39 @@ def scrape_message(message):
                 message_photo.insert(2, "caption", [caption for i in range(len(photo_item))], True)
                 message_photo.insert(7, "insert_time", [pd.Timestamp.utcnow() for i in range(len(photo_item))], True)
                 message_photo.to_sql(name = 'message_photos', con = sql_engine, if_exists = 'append', index=False)
+
+            if "pinned_message" in message.json:
+                if "poll" in message.json["pinned_message"]:
+                    poll_item = message.json["pinned_message"]["poll"]
+                    message_poll_options = pd.DataFrame.from_dict(poll_item["options"], orient = "columns")
+                    message_poll_options.insert(0, "poll_id", [poll_item["id"] for i in range(len(poll_item["options"]))], True)
+                    message_poll_options.insert(3, "insert_time", [pd.Timestamp.utcnow() for i in range(len(poll_item["options"]))], True)
+                    message_poll_options.to_sql(name = 'message_poll_options', con = sql_engine, if_exists = 'append', index=False)
+
+                    message_poll = pd.DataFrame([[message.json['message_id']
+                                            ,message.json["chat"]["id"]
+                                            ,poll_item["id"]
+                                            ,poll_item["question"]
+                                            ,poll_item["total_voter_count"]
+                                            ,poll_item["is_closed"]
+                                            ,poll_item["is_anonymous"]
+                                            ,poll_item["type"]
+                                            ,poll_item["allows_multiple_answers"] 
+                                            ,pd.Timestamp.utcnow()  
+                                        ]]
+                                                ,columns = [
+                                                    "message_id"
+                                                        ,"chat_id"
+                                                        ,"poll_id"
+                                                        ,"question"
+                                                        ,"total_voter_count"
+                                                        ,"is_closed"
+                                                        ,"is_anonymous"
+                                                        ,"type"
+                                                        ,"allows_multiple_answers"
+                                                        ,"insert_time"
+                                                    ])
+                    message_poll.to_sql(name = 'message_polls', con = sql_engine, if_exists = 'append', index=False)
                 
             if "voice" in message.json:
                 
