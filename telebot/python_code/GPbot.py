@@ -484,6 +484,52 @@ def scrape_message(message):
                                                         ,"insert_time"
                                                        ])
                 message_sticker.to_sql(name = 'message_stickers', con = sql_engine, if_exists = 'append', index=False)
+
+            if "location" in message.json:
+                message_location = pd.DataFrame([[message.json['message_id']
+                                                ,message.json["chat"]["id"]
+                                                ,message.location.latitude
+                                                ,message.location.longitude
+                                                ,message.location.horizontal_accuracy
+                                                ,message.location.live_period
+                                                ,message.location.heading
+                                                ,message.location.proximity_alert_radius
+                                                ,pd.Timestamp.utcnow()  
+                                          ]]
+                                                  ,columns = [
+                                                      "message_id"
+                                                        ,"chat_id"
+                                                        ,"latitude"           
+                                                        ,"longitude"    
+                                                        ,"horizontal_accuracy"              
+                                                        ,"live_period"             
+                                                        ,"heading"            
+                                                        ,"proximity_alert_radius"       
+                                                        ,"insert_time"
+                                                       ])
+                message_location.to_sql(name = 'message_locations', con = sql_engine, if_exists = 'append', index=False)
+
+            if "contact" in message.json:
+                message_contact = pd.DataFrame([[message.json['message_id']
+                                                ,message.json["chat"]["id"]
+                                                ,message.contact.phone_number
+                                                ,message.contact.user_id
+                                                ,message.contact.first_name
+                                                ,message.contact.last_name
+                                                ,message.contact.vcard
+                                                ,pd.Timestamp.utcnow()  
+                                          ]]
+                                                  ,columns = [
+                                                        "message_id"
+                                                        ,"chat_id"
+                                                        ,"contact_phone_number"
+                                                        ,"contact_user_id"  
+                                                        ,"contact_first_name"           
+                                                        ,"contact_last_name"
+                                                        ,"contact_vcard"       
+                                                        ,"insert_time"
+                                                       ])
+                message_contact.to_sql(name = 'message_contacts', con = sql_engine, if_exists = 'append', index=False)
             f.write("["+str(pd.Timestamp.now())+"]: done\n")
             f.write("=====================================================================================================\n")
             f.close()
