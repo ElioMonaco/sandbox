@@ -388,7 +388,6 @@ def download_files(what_files, message, bot_instance, bot_key):
 
 def get_files(what_files, message, bot_instance, bot_key):
 
-    print(what_files)
     for index, row in what_files.iterrows():
 
         print(row["file_id"])
