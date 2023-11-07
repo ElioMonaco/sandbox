@@ -1,27 +1,16 @@
-import telebot
-import random
-import datetime
-import pandas as pd
-import mysql.connector
-from sqlalchemy import create_engine, func
-import numpy as np
-import requests
-import json
-
-user_db = '**********'
-passw_db = '*********************'
+user_db = '************'
+passw_db = '************'
 host_db =  'localhost'
 port_db = 3306
 schema_db = 'telegram'
-
-general_purpose = "******************************"
+general_purpose = '************'
 target_user = [
-    "name3"
-    ,"name2"
-    ,"name1"
+    "jackinyellow"
+    ,"gweiffin"
+    ,"The_Bias"
         ]
 chat = {
-    "[PLACEHOLDER ID]": "[PLACEHOLDER NAME]"
+    '************': '************'
 }
 messages = {
     "command_messages": {
@@ -32,6 +21,12 @@ messages = {
             "reply_sc1", "reply_sc2"
         ]
         ,"scrape": True
+        ,"getfile": [
+            
+        ]
+        ,"downloadfile": [
+
+        ]
     }
     ,"reply_messages": {
         "user1": [
@@ -45,10 +40,25 @@ messages = {
     }
 }
 
-def define_connector(user, passw, host, port, schema):
-    connection_string = 'mysql://'+str(user)+':'+str(passw)+'@'+str(host)+':'+str(port)+'/'+str(schema)
-    print("connecting to:", connection_string)
-    return create_engine(connection_string, echo=False)
+message_table_mapping = {
+    "raw": "raw_messages"
+    ,"user": "users_staging"
+    ,"type": "message_types_staging"
+    ,"chat": "chats_staging"
+    ,"message": "messages"
+    ,"entity": "messaeg_entities"
+    ,"photo": "message_photos"
+    ,"poll_option": "message_poll_options"
+    ,"poll": "message_polls"
+    ,"voice": "message_audios"
+    ,"video": "message_videos"
+    ,"sticker": "message_stickers"
+    ,"location": "message_locations"
+    ,"contact": "message_contacts"
+}
 
-def get_current_unix():
-    return int(datetime.datetime.now().timestamp())
+file_types = {
+    "voice": ".mp3"
+    ,"photo": ".jpg"
+    ,"video": ".mp4"
+}
