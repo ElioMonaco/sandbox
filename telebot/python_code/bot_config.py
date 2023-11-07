@@ -46,7 +46,7 @@ message_table_mapping = {
     ,"type": "message_types_staging"
     ,"chat": "chats_staging"
     ,"message": "messages"
-    ,"entity": "messaeg_entities"
+    ,"entity": "message_entities"
     ,"photo": "message_photos"
     ,"poll_option": "message_poll_options"
     ,"poll": "message_polls"

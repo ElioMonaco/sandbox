@@ -6,5 +6,6 @@ CREATE TABLE `message_entities` (
   `length` bigint DEFAULT NULL,
   `type` text,
   `insert_time` datetime NOT NULL,
+  `custom_emoji_id` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+) ENGINE=InnoDB AUTO_INCREMENT=143 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
