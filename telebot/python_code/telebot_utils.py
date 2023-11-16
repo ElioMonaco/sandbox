@@ -11,6 +11,7 @@ import json
 from re import search
 import pandas as pd
 from bot_config import *
+import zipfile 
 
 def define_connector(user, passw, host, port, schema):
     connection_string = 'mysql://'+str(user)+':'+str(passw)+'@'+str(host)+':'+str(port)+'/'+str(schema)
@@ -19,6 +20,9 @@ def define_connector(user, passw, host, port, schema):
 
 def get_current_unix():
     return int(datetime.datetime.now().timestamp())
+
+def time_string(fmt):
+    return datetime.datetime.now().strftime(fmt)
 
 def get_latest_file(engine, message, message_type):
     return pd.read_sql("""SELECT DISTINCT m.message_id
@@ -412,3 +416,38 @@ def get_files(what_files, message, bot_instance, bot_key):
         except Exception as e:
 
             bot_instance.send_message(message.chat.id, f"Error: {str(e)}")
+
+def backup_database(db_host, db_user, db_passwd, db_name, bkp_path, time_name_format, source, log_file):
+    
+    f = open(log_file,'a')
+    original_path = os.getcwd()
+    backup_file = os.path.join(bkp_path, db_name, time_string(time_name_format))
+    db_path = os.path.join(source, db_name)
+    exe_path = os.path.join("C:\\", "Program Files", "MySQL", "MySQL Server 8.0", "bin")
+    
+    if os.path.exists(db_path):
+        
+        f.write("=====================================================================================================\n")
+        f.write("["+str(pd.Timestamp.now())+f"]: changing directory to {exe_path}\n")
+        os.chdir(exe_path)
+        dump_cmd = f".\mysqldump -h {db_host} -u {db_user} -p{db_passwd} {db_name} > {backup_file}.sql"
+        f.write("["+str(pd.Timestamp.now())+f"]: writing back up into {backup_file}.sql with command {dump_cmd}...\n")
+        os.system(dump_cmd)
+        f.write("["+str(pd.Timestamp.now())+f"]: done.\n")
+        f.write("["+str(pd.Timestamp.now())+f"]: changing directory to {original_path}\n")
+        os.chdir(original_path)
+        f.write("["+str(pd.Timestamp.now())+f"]: compressing {backup_file}.sql to {backup_file}.zip...\n")
+        zip = zipfile.ZipFile(f"{backup_file}.zip", "w", zipfile.ZIP_DEFLATED)
+        zip.write(f"{backup_file}.sql")
+        zip.close()
+        f.write("["+str(pd.Timestamp.now())+f"]: done.")
+        f.write("["+str(pd.Timestamp.now())+f"]: removing {backup_file}.sql...\n")
+        os.remove(f"{backup_file}.sql")
+        f.write("["+str(pd.Timestamp.now())+f"]: done.\n")
+        f.write("=====================================================================================================\n")
+        f.close()
+        
+    else:
+        f.write("["+str(pd.Timestamp.now())+f"could not find the requested database '{db_name}'")
+        f.write("=====================================================================================================\n")
+        f.close()

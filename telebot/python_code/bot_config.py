@@ -1,16 +1,21 @@
-user_db = '************'
-passw_db = '************'
+user_db = "************************"
+passw_db = "************************"
 host_db =  'localhost'
 port_db = 3306
 schema_db = 'telegram'
-general_purpose = '************'
+jack_frocio = "************************"
+jaden_picio = "************************"
+general_purpose = "************************"
+bkp_mysql = "E:\\MySQL"
+mysql_data_location = "C:\\ProgramData\\MySQL\\MySQL Server 8.0\\Data"
+logs_data_location = "E:\\MySQL\\GPbot_logs"
 target_user = [
     "jackinyellow"
     ,"gweiffin"
     ,"The_Bias"
         ]
 chat = {
-    '************': '************'
+    "************************": "************************"
 }
 messages = {
     "command_messages": {
@@ -46,7 +51,7 @@ message_table_mapping = {
     ,"type": "message_types_staging"
     ,"chat": "chats_staging"
     ,"message": "messages"
-    ,"entity": "messaeg_entities"
+    ,"entity": "message_entities"
     ,"photo": "message_photos"
     ,"poll_option": "message_poll_options"
     ,"poll": "message_polls"
