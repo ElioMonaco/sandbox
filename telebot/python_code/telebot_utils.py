@@ -440,7 +440,7 @@ def backup_database(db_host, db_user, db_passwd, db_name, bkp_path, time_name_fo
         zip = zipfile.ZipFile(f"{backup_file}.zip", "w", zipfile.ZIP_DEFLATED)
         zip.write(f"{backup_file}.sql")
         zip.close()
-        f.write("["+str(pd.Timestamp.now())+f"]: done.")
+        f.write("["+str(pd.Timestamp.now())+f"]: done.\n")
         f.write("["+str(pd.Timestamp.now())+f"]: removing {backup_file}.sql...\n")
         os.remove(f"{backup_file}.sql")
         f.write("["+str(pd.Timestamp.now())+f"]: done.\n")
