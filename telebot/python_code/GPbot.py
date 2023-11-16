@@ -7,6 +7,7 @@ dataframe_types = pd.read_sql('SELECT * FROM telegram.message_types', sql_engine
 dataframe_timestamp = pd.read_sql('SELECT MAX(message_timestamp) AS value FROM telegram.messages', sql_engine)
 messages_from_time = dataframe_timestamp["value"][0] if dataframe_timestamp.count()[0] == 1 else get_current_unix()
 message_types = list(dataframe_types["message_type"])
+log_file = os.path.join(logs_data_location, time_string("%Y%m%d")+"_GPbot_logs")
 
 @bot.message_handler(commands = commands)
 
@@ -59,7 +60,7 @@ def send_welcome(message):
 
         if messages["command_messages"]["scrape"]:
 
-            f = open(str(datetime.datetime.now().year)+"_"+str(datetime.datetime.now().month)+"_"+str(datetime.datetime.now().day)+"_GPbot_logs",'a')
+            f = open(log_file,'a')
             f.write("["+str(pd.Timestamp.now())+"]: begin transaction for message "+str(message.json['message_id'])+" from user "+str(message.from_user.id)+" from chat "+str(message.chat.id)+". Logs from scraper function.\n")
             f.write("["+str(pd.Timestamp.now())+"]: appending raw message to database...\n")
             raw_message = raw_df(message)
@@ -110,7 +111,7 @@ def scrape_message(message):
 
         if messages["command_messages"]["scrape"]:
 
-            f = open(str(datetime.datetime.now().year)+"_"+str(datetime.datetime.now().month)+"_"+str(datetime.datetime.now().day)+"_GPbot_logs",'a')
+            f = open(log_file,'a')
             f.write("["+str(pd.Timestamp.now())+"]: begin transaction for message "+str(message.json['message_id'])+" from user "+str(message.from_user.id)+" from chat "+str(message.chat.id)+". Logs from scraper function.\n")
             f.write("["+str(pd.Timestamp.now())+"]: appending raw message to database...\n")
             raw_message = raw_df(message)
@@ -186,5 +187,14 @@ def scrape_message(message):
             f.write("["+str(pd.Timestamp.now())+"]: done\n")
             f.write("=====================================================================================================\n")
             f.close()
+
+backup_database(db_host = host_db
+                ,db_user = user_db
+                ,db_passwd = passw_db
+                ,db_name = schema_db
+                ,bkp_path = bkp_mysql
+                ,time_name_format = "%Y%m%d-%H%M%S"
+                ,source = mysql_data_location,
+                log_file = log_file)
 
 run_bot(bot_instance = bot, times = 100)
