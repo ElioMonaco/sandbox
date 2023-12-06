@@ -138,7 +138,7 @@ def chat_df(message):
                                         ,"has_aggressive_anti_spam_enabled"
                                         ,"emoji_status_expiration_date"])
 
-def message_df(message):
+def message_df(message, pinned):
     first_df = pd.DataFrame([[message.json['message_id']
                                 ,message.content_type
                                 ,message.json["from"]["id"]
@@ -157,7 +157,7 @@ def message_df(message):
             
     if "text" in message.json:
         text_item = message.json["text"] 
-    elif "pinned_message" in message.json and "text" in message.json["pinned_message"]:
+    elif pinned and "text" in message.json["pinned_message"]:
         text_item = message.json["pinned_message"]["text"]
     elif "new_chat_title" in message.json:
         text_item = message.json["new_chat_title"] 
@@ -181,8 +181,11 @@ def entity_df(message):
     first_df.insert(5, "insert_time", [pd.Timestamp.utcnow() for i in range(len(message.json["entities"]))], True)
     return first_df
     
-def photo_df(message):
-    photo_item = message.json["photo"] if "photo" in message.json else message.json["new_chat_photo"]
+def photo_df(message, pinned):
+    if pinned:
+        photo_item = message.json["pinned_message"]["photo"] if "photo" in message.json["pinned_message"] else message.json["pinned_message"]["new_chat_photo"]
+    else:
+        photo_item = message.json["photo"] if "photo" in message.json else message.json["new_chat_photo"]
     first_df = pd.DataFrame.from_dict(photo_item, orient = "columns")
     first_df.insert(0, "message_id", [message.json["message_id"] for i in range(len(photo_item))], True)
     first_df.insert(1, "chat_id", [message.json["chat"]["id"] for i in range(len(photo_item))], True)
@@ -191,8 +194,8 @@ def photo_df(message):
     first_df.insert(7, "insert_time", [pd.Timestamp.utcnow() for i in range(len(photo_item))], True)
     return first_df
 
-def poll_df(message):
-    poll_item = message.json["pinned_message"]["poll"]
+def poll_df(message, pinned):
+    poll_item = message.json["pinned_message"]["poll"] if pinned else message.json["poll"]
     first_df = pd.DataFrame.from_dict(poll_item["options"], orient = "columns")
     first_df.insert(0, "poll_id", [poll_item["id"] for i in range(len(poll_item["options"]))], True)
     first_df.insert(3, "insert_time", [pd.Timestamp.utcnow() for i in range(len(poll_item["options"]))], True)
@@ -221,14 +224,15 @@ def poll_df(message):
                                 ])
     return first_df, second_df
 
-def voice_df(message):
+def voice_df(message, pinned):
+    voice_item = message.json["pinned_message"]["voice"] if pinned else message.json["voice"]
     return pd.DataFrame([[message.json['message_id']
                             ,message.json["chat"]["id"]
-                            ,message.json["voice"]["duration"]
-                            ,message.json["voice"]["mime_type"]
-                            ,message.json["voice"]["file_id"]
-                            ,message.json["voice"]["file_unique_id"]
-                            ,message.json["voice"]["file_size"]
+                            ,voice_item["duration"]
+                            ,voice_item["mime_type"]
+                            ,voice_item["file_id"]
+                            ,voice_item["file_unique_id"]
+                            ,voice_item["file_size"]
                             ,pd.Timestamp.utcnow()  
                         ]]
                         ,columns = [
@@ -242,17 +246,18 @@ def voice_df(message):
                                         ,"insert_time"
                                     ])
 
-def video_df(message):
+def video_df(message, pinned):
+    video_item = message.json["pinned_message"]["video"] if pinned else message.json["video"]
     return pd.DataFrame([[message.json['message_id']
                             ,message.json["chat"]["id"]
-                            ,message.video.file_id
-                            ,message.video.file_unique_id
-                            ,message.video.width
-                            ,message.video.height
-                            ,message.video.duration
-                            ,message.video.file_name
-                            ,message.video.mime_type
-                            ,message.video.file_size
+                            ,video_item["file_id"]
+                            ,video_item["file_unique_id"]
+                            ,video_item["width"]
+                            ,video_item["height"]
+                            ,video_item["duration"]
+                            ,video_item["file_name"]
+                            ,video_item["mime_type"]
+                            ,video_item["file_size"]
                             ,pd.Timestamp.utcnow()  
                         ]]
                         ,columns = [
@@ -269,23 +274,24 @@ def video_df(message):
                                 ,"insert_time"
                             ])
 
-def sticker_df(message):
+def sticker_df(message, pinned):
+    sticker_item = message.json["pinned_message"]["sticker"] if pinned else message.json["sticker"]
     return pd.DataFrame([[message.json['message_id']
                             ,message.json["chat"]["id"]
-                            ,message.sticker.file_id
-                            ,message.sticker.file_unique_id
-                            ,message.sticker.type
-                            ,message.sticker.width
-                            ,message.sticker.height
-                            ,message.sticker.is_animated
-                            ,message.sticker.is_video
-                            ,message.sticker.emoji
-                            ,message.sticker.set_name
-                            ,message.sticker.mask_position
-                            ,message.sticker.file_size
-                            ,message.sticker.premium_animation
-                            ,message.sticker.custom_emoji_id
-                            ,message.sticker.needs_repainting
+                            ,sticker_item["file_id"]
+                            ,sticker_item["file_unique_id"]
+                            ,sticker_item["type"]
+                            ,sticker_item["width"]
+                            ,sticker_item["height"]
+                            ,sticker_item["is_animated"]
+                            ,sticker_item["is_video"]
+                            ,sticker_item["emoji"]
+                            ,sticker_item["set_name"]
+                            ,sticker_item["mask_position"]
+                            ,sticker_item["file_size"]
+                            ,sticker_item["premium_animation"]
+                            ,sticker_item["custom_emoji_id"]
+                            ,sticker_item["needs_repainting"]
                             ,pd.Timestamp.utcnow()  
                       ]]
                       ,columns = [
@@ -308,15 +314,16 @@ def sticker_df(message):
                             ,"insert_time"
                            ])
 
-def location_df(message):
-    return pd.DataFrame([[message.json['message_id']
+def location_df(message, pinned):
+    location_item = message.json["pinned_message"]["location"] if pinned else message.json["location"]
+    return pd.DataFrame([[message.json["message_id"]
                               ,message.json["chat"]["id"]
-                              ,message.location.latitude
-                              ,message.location.longitude
-                              ,message.location.horizontal_accuracy
-                              ,message.location.live_period
-                              ,message.location.heading
-                              ,message.location.proximity_alert_radius
+                              ,location_item["latitude"]
+                              ,location_item["longitude"]
+                              ,location_item["horizontal_accuracy"]
+                              ,location_item["live_period"]
+                              ,location_item["heading"]
+                              ,location_item["proximity_alert_radius"]
                               ,pd.Timestamp.utcnow()  
                         ]]
                         ,columns = [
@@ -331,14 +338,15 @@ def location_df(message):
                               ,"insert_time"
                              ])
 
-def contact_df(message):
+def contact_df(message, pinned):
+    contact_item = message.json["pinned_message"]["contact"] if pinned else message.json["contact"]
     return pd.DataFrame([[message.json['message_id']
                               ,message.json["chat"]["id"]
-                              ,message.contact.phone_number
-                              ,message.contact.user_id
-                              ,message.contact.first_name
-                              ,message.contact.last_name
-                              ,message.contact.vcard
+                              ,contact_item["phone_number"]
+                              ,contact_item["user_id"]
+                              ,contact_item["first_name"]
+                              ,contact_item["last_name"]
+                              ,contact_item["vcard"]
                               ,pd.Timestamp.utcnow()  
                         ]]
                         ,columns = [
@@ -349,6 +357,27 @@ def contact_df(message):
                               ,"contact_first_name"           
                               ,"contact_last_name"
                               ,"contact_vcard"       
+                              ,"insert_time"
+                             ])
+
+def error_df(message, step, step_nbr, **kwargs):
+    extraoption = kwargs.get("error_message", None)
+    is_error = True if extraoption != None else False
+    return pd.DataFrame([[message.json['message_id']
+                              ,message.json["chat"]["id"]
+                              ,step
+                              ,step_nbr
+                              ,is_error
+                              ,extraoption
+                              ,pd.Timestamp.utcnow()  
+                        ]]
+                        ,columns = [
+                              "message_id"
+                              ,"chat_id"
+                              ,"step"
+                              ,"step_number"
+                              ,"is_error"
+                              ,"error_message"      
                               ,"insert_time"
                              ])
 
@@ -429,21 +458,48 @@ def backup_database(db_host, db_user, db_passwd, db_name, bkp_path, time_name_fo
         
         f.write("=====================================================================================================\n")
         f.write("["+str(pd.Timestamp.now())+f"]: changing directory to {exe_path}\n")
-        os.chdir(exe_path)
+
+        try:
+            os.chdir(exe_path)
+            f.write("["+str(pd.Timestamp.now())+f"]: done.\n")
+        except Exception as err:
+                f.write("["+str(pd.Timestamp.now())+"]: could not perform the action due to the following error: "+str(err)+"\n")
+
         dump_cmd = f".\mysqldump -h {db_host} -u {db_user} -p{db_passwd} {db_name} > {backup_file}.sql"
         f.write("["+str(pd.Timestamp.now())+f"]: writing back up into {backup_file}.sql with command {dump_cmd}...\n")
-        os.system(dump_cmd)
-        f.write("["+str(pd.Timestamp.now())+f"]: done.\n")
+
+        try:
+            os.system(dump_cmd)
+            f.write("["+str(pd.Timestamp.now())+f"]: done.\n")
+        except Exception as err:
+                f.write("["+str(pd.Timestamp.now())+"]: could not perform the action due to the following error: "+str(err)+"\n")
+
         f.write("["+str(pd.Timestamp.now())+f"]: changing directory to {original_path}\n")
-        os.chdir(original_path)
+
+        try:
+            os.chdir(original_path)
+            f.write("["+str(pd.Timestamp.now())+f"]: done.\n")
+        except Exception as err:
+                f.write("["+str(pd.Timestamp.now())+"]: could not perform the action due to the following error: "+str(err)+"\n")
+
         f.write("["+str(pd.Timestamp.now())+f"]: compressing {backup_file}.sql to {backup_file}.zip...\n")
-        zip = zipfile.ZipFile(f"{backup_file}.zip", "w", zipfile.ZIP_DEFLATED)
-        zip.write(f"{backup_file}.sql")
-        zip.close()
-        f.write("["+str(pd.Timestamp.now())+f"]: done.\n")
+
+        try:
+            zip = zipfile.ZipFile(f"{backup_file}.zip", "w", zipfile.ZIP_DEFLATED)
+            zip.write(f"{backup_file}.sql")
+            zip.close()
+            f.write("["+str(pd.Timestamp.now())+f"]: done.\n")
+        except Exception as err:
+                f.write("["+str(pd.Timestamp.now())+"]: could not perform the action due to the following error: "+str(err)+"\n")
+
         f.write("["+str(pd.Timestamp.now())+f"]: removing {backup_file}.sql...\n")
-        os.remove(f"{backup_file}.sql")
-        f.write("["+str(pd.Timestamp.now())+f"]: done.\n")
+
+        try:
+            os.remove(f"{backup_file}.sql")
+            f.write("["+str(pd.Timestamp.now())+f"]: done.\n")
+        except Exception as err:
+                f.write("["+str(pd.Timestamp.now())+"]: could not perform the action due to the following error: "+str(err)+"\n")
+
         f.write("=====================================================================================================\n")
         f.close()
         
@@ -451,3 +507,57 @@ def backup_database(db_host, db_user, db_passwd, db_name, bkp_path, time_name_fo
         f.write("["+str(pd.Timestamp.now())+f"could not find the requested database '{db_name}'")
         f.write("=====================================================================================================\n")
         f.close()
+
+def attempt_insert(message, step, step_nbr, sql_engine, log_file, **kwargs):
+    pinned = kwargs.get("pinned", False)
+
+    try:
+
+        if step == "raw_messages":
+                dataframe_insert = raw_df(message)
+        elif step == "users_staging":
+            dataframe_insert = user_df(message)
+        elif step == "message_types_staging":
+            dataframe_insert = type_df(message)
+        elif step == "chats_staging":
+            dataframe_insert = chat_df(message)
+        elif step == "messages":
+            dataframe_insert = message_df(message, pinned)
+        elif step == "message_entities":
+            dataframe_insert = entity_df(message)
+        elif step == "message_photos":
+            dataframe_insert = photo_df(message, pinned)
+        elif step == "message_polls":
+            dataframe_insert2, dataframe_insert = poll_df(message, pinned)
+        elif step == "message_audios":
+            dataframe_insert = voice_df(message, pinned)
+        elif step == "message_videos":
+            dataframe_insert = video_df(message, pinned)
+        elif step == "message_stickers":
+            dataframe_insert = sticker_df(message, pinned)
+        elif step == "message_locations":
+            dataframe_insert = location_df(message, pinned)
+        elif step == "message_contacts":
+            dataframe_insert = contact_df(message, pinned)
+        
+        dataframe_insert.to_sql(name = step, con = sql_engine, if_exists = 'append', index=False)
+        log_file.write("["+str(pd.Timestamp.now())+"]: done\n")
+        error_df(message, step, step_nbr).to_sql(name = message_table_mapping["error"], con = sql_engine, if_exists = 'append', index=False)
+        if step == "message_polls":
+            dataframe_insert2.to_sql(name = message_table_mapping["poll_option"], con = sql_engine, if_exists = 'append', index=False)
+    
+    except Exception as err:
+        log_file.write("["+str(pd.Timestamp.now())+"]: could not perform the action due to the following error: "+str(err)+"\n")
+        error_df(message, step, step_nbr, error_message = err).to_sql(name = message_table_mapping["error"], con = sql_engine, if_exists = 'append', index=False)
+
+def attempt_exec(message, step, step_nbr, sql_engine, log_file):
+
+    try:
+
+        sql_engine.execute(step)
+        log_file.write("["+str(pd.Timestamp.now())+"]: done\n")
+        error_df(message, step, step_nbr).to_sql(name = message_table_mapping["error"], con = sql_engine, if_exists = 'append', index=False)
+
+    except Exception as err:
+        log_file.write("["+str(pd.Timestamp.now())+"]: could not perform the action due to the following error: "+str(err)+"\n")
+        error_df(message, step, step_nbr, error_message = err).to_sql(name = message_table_mapping["error"], con = sql_engine, if_exists = 'append', index=False)
