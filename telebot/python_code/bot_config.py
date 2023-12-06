@@ -60,6 +60,7 @@ message_table_mapping = {
     ,"sticker": "message_stickers"
     ,"location": "message_locations"
     ,"contact": "message_contacts"
+    ,"error": "processing_errors"
 }
 
 file_types = {

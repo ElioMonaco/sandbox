@@ -63,43 +63,79 @@ def send_welcome(message):
             f = open(log_file,'a')
             f.write("["+str(pd.Timestamp.now())+"]: begin transaction for message "+str(message.json['message_id'])+" from user "+str(message.from_user.id)+" from chat "+str(message.chat.id)+". Logs from scraper function.\n")
             f.write("["+str(pd.Timestamp.now())+"]: appending raw message to database...\n")
-            raw_message = raw_df(message)
-            raw_message.to_sql(name = message_table_mapping["raw"], con = sql_engine, if_exists = 'append', index=False)
-            f.write("["+str(pd.Timestamp.now())+"]: done\n")
+            attempt_insert(message, step = message_table_mapping["raw"], step_nbr = 0, sql_engine = sql_engine, log_file = f)
 
             f.write("["+str(pd.Timestamp.now())+"]: appending user to staging...\n")
-            message_user = user_df(message)
-            message_user.to_sql(name = message_table_mapping["user"], con = sql_engine, if_exists = 'append', index=False)
-            f.write("["+str(pd.Timestamp.now())+"]: done\n")
+            attempt_insert(message, step = message_table_mapping["user"], step_nbr = 1, sql_engine = sql_engine, log_file = f)
+
             f.write("["+str(pd.Timestamp.now())+"]: merging staging user with final user registry...\n")
-            sql_engine.execute("CALL `telegram`.`update_users`();")
-            f.write("["+str(pd.Timestamp.now())+"]: done\n")
+            attempt_exec(message, step = "CALL `telegram`.`update_users`();", step_nbr = 2, sql_engine = sql_engine, log_file = f)
 
             f.write("["+str(pd.Timestamp.now())+"]: appending message type to staging...\n")
-            message_type = type_df(message)
-            message_type.to_sql(name = message_table_mapping["type"], con = sql_engine, if_exists = 'append', index=False)
-            f.write("["+str(pd.Timestamp.now())+"]: done\n")
+            attempt_insert(message, step = message_table_mapping["type"], step_nbr = 3, sql_engine = sql_engine, log_file = f)
+
             f.write("["+str(pd.Timestamp.now())+"]: merging staging message types with final message types registry...\n")
-            sql_engine.execute("CALL `telegram`.`update_message_types`();")
-            f.write("["+str(pd.Timestamp.now())+"]: done\n")
+            attempt_exec(message, step = "CALL `telegram`.`update_message_types`();", step_nbr = 4, sql_engine = sql_engine, log_file = f)
 
             f.write("["+str(pd.Timestamp.now())+"]: appending chat to staging...\n")
-            message_chat = chat_df(message)
-            message_chat.to_sql(name = message_table_mapping["chat"], con = sql_engine, if_exists = 'append', index=False)
-            f.write("["+str(pd.Timestamp.now())+"]: done\n")
+            attempt_insert(message, step = message_table_mapping["chat"], step_nbr = 5, sql_engine = sql_engine, log_file = f)
+
             f.write("["+str(pd.Timestamp.now())+"]: merging staging chats with final chats registry...\n")
-            sql_engine.execute("CALL telegram.update_chats();")
-            f.write("["+str(pd.Timestamp.now())+"]: done\n")
+            attempt_exec(message, step = "CALL `telegram`.`update_chats`();", step_nbr = 6, sql_engine = sql_engine, log_file = f)
 
             f.write("["+str(pd.Timestamp.now())+"]: writing message to database...\n")
-            message_item = message_df(message)
-            message_item.to_sql(name = message_table_mapping["message"], con = sql_engine, if_exists = 'append', index=False)
+            attempt_insert(message, step = message_table_mapping["message"], step_nbr = 7, sql_engine = sql_engine, log_file = f)
             
+            step_nbr = 7
+            pinned = True if "pinned_message" in message.json else False
             if "entities" in message.json:
 
-                message_entity = entity_df(message)
-                message_entity.to_sql(name = message_table_mapping["entity"], con = sql_engine, if_exists = 'append', index=False)
+                step_nbr += 1
+                f.write("["+str(pd.Timestamp.now())+"]: writing entities to database...\n")
+                attempt_insert(message, step = message_table_mapping["entity"], step_nbr = step_nbr, sql_engine = sql_engine, log_file = f, pinned = pinned)
 
+            if "photo" in message.json or "new_chat_photo" in message.json or (pinned and ("photo" in message.json["pinned_message"] or "new_chat_photo" in message.json["pinned_message"])):
+                
+                step_nbr += 1
+                f.write("["+str(pd.Timestamp.now())+"]: writing photos to database...\n")
+                attempt_insert(message, step = message_table_mapping["photo"], step_nbr = step_nbr, sql_engine = sql_engine, log_file = f, pinned = pinned)
+ 
+            if "poll" in message.json or (pinned and "poll" in message.json["pinned_message"]):
+                
+                step_nbr += 1
+                f.write("["+str(pd.Timestamp.now())+"]: writing poll to database...\n")
+                attempt_insert(message, step = message_table_mapping["poll"], step_nbr = step_nbr, sql_engine = sql_engine, log_file = f, pinned = pinned)
+                
+            if "voice" in message.json or (pinned and "voice" in message.json["pinned_message"]):
+                
+                step_nbr += 1
+                f.write("["+str(pd.Timestamp.now())+"]: writing voice to database...\n")
+                attempt_insert(message, step = message_table_mapping["voice"], step_nbr = step_nbr, sql_engine = sql_engine, log_file = f, pinned = pinned)
+            
+            if "video" in message.json or (pinned and "video" in message.json["pinned_message"]):
+
+                step_nbr += 1
+                f.write("["+str(pd.Timestamp.now())+"]: writing video to database...\n")
+                attempt_insert(message, step = message_table_mapping["video"], step_nbr = step_nbr, sql_engine = sql_engine, log_file = f, pinned = pinned)
+            
+            if "sticker" in message.json or (pinned and "sticker" in message.json["pinned_message"]):
+
+                step_nbr += 1
+                f.write("["+str(pd.Timestamp.now())+"]: writing sticker to database...\n")
+                attempt_insert(message, step = message_table_mapping["sticker"], step_nbr = step_nbr, sql_engine = sql_engine, log_file = f, pinned = pinned)
+
+            if "location" in message.json or (pinned and "location" in message.json["pinned_message"]):
+
+                step_nbr += 1
+                f.write("["+str(pd.Timestamp.now())+"]: writing location to database...\n")
+                attempt_insert(message, step = message_table_mapping["location"], step_nbr = step_nbr, sql_engine = sql_engine, log_file = f, pinned = pinned)
+
+            if "contact" in message.json or (pinned and "contact" in message.json["pinned_message"]):
+
+                step_nbr += 1
+                f.write("["+str(pd.Timestamp.now())+"]: writing location to database...\n")
+                attempt_insert(message, step = message_table_mapping["contact"], step_nbr = step_nbr, sql_engine = sql_engine, log_file = f, pinned = pinned)
+                    
             f.write("["+str(pd.Timestamp.now())+"]: done\n")
             f.write("=====================================================================================================\n")
             f.close()
@@ -114,76 +150,79 @@ def scrape_message(message):
             f = open(log_file,'a')
             f.write("["+str(pd.Timestamp.now())+"]: begin transaction for message "+str(message.json['message_id'])+" from user "+str(message.from_user.id)+" from chat "+str(message.chat.id)+". Logs from scraper function.\n")
             f.write("["+str(pd.Timestamp.now())+"]: appending raw message to database...\n")
-            raw_message = raw_df(message)
-            raw_message.to_sql(name = message_table_mapping["raw"], con = sql_engine, if_exists = 'append', index=False)
-            f.write("["+str(pd.Timestamp.now())+"]: done\n")
+            attempt_insert(message, step = message_table_mapping["raw"], step_nbr = 0, sql_engine = sql_engine, log_file = f)
 
             f.write("["+str(pd.Timestamp.now())+"]: appending user to staging...\n")
-            message_user = user_df(message)
-            message_user.to_sql(name = message_table_mapping["user"], con = sql_engine, if_exists = 'append', index=False)
-            f.write("["+str(pd.Timestamp.now())+"]: done\n")
+            attempt_insert(message, step = message_table_mapping["user"], step_nbr = 1, sql_engine = sql_engine, log_file = f)
+
             f.write("["+str(pd.Timestamp.now())+"]: merging staging user with final user registry...\n")
-            sql_engine.execute("CALL `telegram`.`update_users`();")
-            f.write("["+str(pd.Timestamp.now())+"]: done\n")
+            attempt_exec(message, step = "CALL `telegram`.`update_users`();", step_nbr = 2, sql_engine = sql_engine, log_file = f)
 
             f.write("["+str(pd.Timestamp.now())+"]: appending message type to staging...\n")
-            message_type = type_df(message)
-            message_type.to_sql(name = message_table_mapping["type"], con = sql_engine, if_exists = 'append', index=False)
-            f.write("["+str(pd.Timestamp.now())+"]: done\n")
+            attempt_insert(message, step = message_table_mapping["type"], step_nbr = 3, sql_engine = sql_engine, log_file = f)
+
             f.write("["+str(pd.Timestamp.now())+"]: merging staging message types with final message types registry...\n")
-            sql_engine.execute("CALL `telegram`.`update_message_types`();")
-            f.write("["+str(pd.Timestamp.now())+"]: done\n")
+            attempt_exec(message, step = "CALL `telegram`.`update_message_types`();", step_nbr = 4, sql_engine = sql_engine, log_file = f)
 
             f.write("["+str(pd.Timestamp.now())+"]: appending chat to staging...\n")
-            message_chat = chat_df(message)
-            message_chat.to_sql(name = message_table_mapping["chat"], con = sql_engine, if_exists = 'append', index=False)
-            f.write("["+str(pd.Timestamp.now())+"]: done\n")
+            attempt_insert(message, step = message_table_mapping["chat"], step_nbr = 5, sql_engine = sql_engine, log_file = f)
+
             f.write("["+str(pd.Timestamp.now())+"]: merging staging chats with final chats registry...\n")
-            sql_engine.execute("CALL telegram.update_chats();")
-            f.write("["+str(pd.Timestamp.now())+"]: done\n")
+            attempt_exec(message, step = "CALL `telegram`.`update_chats`();", step_nbr = 6, sql_engine = sql_engine, log_file = f)
 
             f.write("["+str(pd.Timestamp.now())+"]: writing message to database...\n")
-            message_item = message_df(message)
-            message_item.to_sql(name = message_table_mapping["message"], con = sql_engine, if_exists = 'append', index=False)
+            attempt_insert(message, step = message_table_mapping["message"], step_nbr = 7, sql_engine = sql_engine, log_file = f)
             
+            step_nbr = 7
+            pinned = True if "pinned_message" in message.json else False
             if "entities" in message.json:
 
-                message_entity = entity_df(message)
-                message_entity.to_sql(name = message_table_mapping["entity"], con = sql_engine, if_exists = 'append', index=False)
+                step_nbr += 1
+                f.write("["+str(pd.Timestamp.now())+"]: writing entities to database...\n")
+                attempt_insert(message, step = message_table_mapping["entity"], step_nbr = step_nbr, sql_engine = sql_engine, log_file = f, pinned = pinned)
 
-            if "photo" in message.json or "new_chat_photo" in message.json:
-
-                message_photo = photo_df(message)
-                message_photo.to_sql(name = message_table_mapping["photo"], con = sql_engine, if_exists = 'append', index=False)
-
-            if "pinned_message" in message.json:
+            if "photo" in message.json or "new_chat_photo" in message.json or (pinned and ("photo" in message.json["pinned_message"] or "new_chat_photo" in message.json["pinned_message"])):
                 
-                if "poll" in message.json["pinned_message"]:
-
-                    message_poll_options, message_poll = poll_df(message)
-                    message_poll_options.to_sql(name = message_table_mapping["poll_option"], con = sql_engine, if_exists = 'append', index=False)
-                    message_poll.to_sql(name = message_table_mapping["poll"], con = sql_engine, if_exists = 'append', index=False)
+                step_nbr += 1
+                f.write("["+str(pd.Timestamp.now())+"]: writing photos to database...\n")
+                attempt_insert(message, step = message_table_mapping["photo"], step_nbr = step_nbr, sql_engine = sql_engine, log_file = f, pinned = pinned)
+ 
+            if "poll" in message.json or (pinned and "poll" in message.json["pinned_message"]):
                 
-            if "voice" in message.json:
+                step_nbr += 1
+                f.write("["+str(pd.Timestamp.now())+"]: writing poll to database...\n")
+                attempt_insert(message, step = message_table_mapping["poll"], step_nbr = step_nbr, sql_engine = sql_engine, log_file = f, pinned = pinned)
                 
-                message_audio = voice_df(message)
-                message_audio.to_sql(name = message_table_mapping["voice"], con = sql_engine, if_exists = 'append', index=False)
+            if "voice" in message.json or (pinned and "voice" in message.json["pinned_message"]):
+                
+                step_nbr += 1
+                f.write("["+str(pd.Timestamp.now())+"]: writing voice to database...\n")
+                attempt_insert(message, step = message_table_mapping["voice"], step_nbr = step_nbr, sql_engine = sql_engine, log_file = f, pinned = pinned)
             
-            if "video" in message.json:
-                message_video = video_df(message)
-                message_video.to_sql(name = message_table_mapping["video"], con = sql_engine, if_exists = 'append', index=False)
+            if "video" in message.json or (pinned and "video" in message.json["pinned_message"]):
+
+                step_nbr += 1
+                f.write("["+str(pd.Timestamp.now())+"]: writing video to database...\n")
+                attempt_insert(message, step = message_table_mapping["video"], step_nbr = step_nbr, sql_engine = sql_engine, log_file = f, pinned = pinned)
             
-            if "sticker" in message.json:
-                message_sticker = sticker_df(message)
-                message_sticker.to_sql(name = message_table_mapping["sticker"], con = sql_engine, if_exists = 'append', index=False)
+            if "sticker" in message.json or (pinned and "sticker" in message.json["pinned_message"]):
 
-            if "location" in message.json:
-                message_location = location_df(message)
-                message_location.to_sql(name = message_table_mapping["location"], con = sql_engine, if_exists = 'append', index=False)
+                step_nbr += 1
+                f.write("["+str(pd.Timestamp.now())+"]: writing sticker to database...\n")
+                attempt_insert(message, step = message_table_mapping["sticker"], step_nbr = step_nbr, sql_engine = sql_engine, log_file = f, pinned = pinned)
 
-            if "contact" in message.json:
-                message_contact = contact_df(message)
-                message_contact.to_sql(name = message_table_mapping["contact"], con = sql_engine, if_exists = 'append', index=False)
+            if "location" in message.json or (pinned and "location" in message.json["pinned_message"]):
+
+                step_nbr += 1
+                f.write("["+str(pd.Timestamp.now())+"]: writing location to database...\n")
+                attempt_insert(message, step = message_table_mapping["location"], step_nbr = step_nbr, sql_engine = sql_engine, log_file = f, pinned = pinned)
+
+            if "contact" in message.json or (pinned and "contact" in message.json["pinned_message"]):
+
+                step_nbr += 1
+                f.write("["+str(pd.Timestamp.now())+"]: writing location to database...\n")
+                attempt_insert(message, step = message_table_mapping["contact"], step_nbr = step_nbr, sql_engine = sql_engine, log_file = f, pinned = pinned)
+                    
             f.write("["+str(pd.Timestamp.now())+"]: done\n")
             f.write("=====================================================================================================\n")
             f.close()
