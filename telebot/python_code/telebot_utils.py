@@ -163,6 +163,8 @@ def message_df(message, pinned):
         text_item = message.json["new_chat_title"] 
     elif "caption" in message.json:
         text_item = message.json["caption"] 
+    elif "caption" in message.json["pinned_message"]:
+        text_item = message.json["pinned_message"]["caption"] 
     else: 
         text_item = None
     first_df.insert(5, "text", text_item, True)
@@ -189,9 +191,7 @@ def photo_df(message, pinned):
     first_df = pd.DataFrame.from_dict(photo_item, orient = "columns")
     first_df.insert(0, "message_id", [message.json["message_id"] for i in range(len(photo_item))], True)
     first_df.insert(1, "chat_id", [message.json["chat"]["id"] for i in range(len(photo_item))], True)
-    caption = message.json["caption"] if "caption" in message.json else None
-    first_df.insert(2, "caption", [caption for i in range(len(photo_item))], True)
-    first_df.insert(7, "insert_time", [pd.Timestamp.utcnow() for i in range(len(photo_item))], True)
+    first_df.insert(6, "insert_time", [pd.Timestamp.utcnow() for i in range(len(photo_item))], True)
     return first_df
 
 def poll_df(message, pinned):
@@ -315,15 +315,21 @@ def sticker_df(message, pinned):
                            ])
 
 def location_df(message, pinned):
-    location_item = message.json["pinned_message"]["location"] if pinned else message.json["location"]
-    return pd.DataFrame([[message.json["message_id"]
+    if pinned:
+        location_item = message.json["pinned_message"]["location"]
+        horizontal_accuracy = location_item["horizontal_accuracy"] if "horizontal_accuracy" in location_item else None
+        live_period = location_item["live_period"] if "live_period" in location_item else None
+        heading = location_item["heading"] if "heading" in location_item else None
+        proximity_alert_radius = location_item["proximity_alert_radius"] if "proximity_alert_radius" in location_item else None
+
+        return pd.DataFrame([[message.json['message_id']
                               ,message.json["chat"]["id"]
                               ,location_item["latitude"]
                               ,location_item["longitude"]
-                              ,location_item["horizontal_accuracy"]
-                              ,location_item["live_period"]
-                              ,location_item["heading"]
-                              ,location_item["proximity_alert_radius"]
+                              ,horizontal_accuracy
+                              ,live_period
+                              ,heading
+                              ,proximity_alert_radius
                               ,pd.Timestamp.utcnow()  
                         ]]
                         ,columns = [
@@ -337,28 +343,79 @@ def location_df(message, pinned):
                               ,"proximity_alert_radius"       
                               ,"insert_time"
                              ])
+    
+    else:
+        return pd.DataFrame([[message.json['message_id']
+                                ,message.json["chat"]["id"]
+                                ,message.location.latitude
+                                ,message.location.longitude
+                                ,message.location.horizontal_accuracy
+                                ,message.location.live_period
+                                ,message.location.heading
+                                ,message.location.proximity_alert_radius
+                                ,pd.Timestamp.utcnow()  
+                            ]]
+                            ,columns = [
+                                "message_id"
+                                ,"chat_id"
+                                ,"latitude"           
+                                ,"longitude"    
+                                ,"horizontal_accuracy"              
+                                ,"live_period"             
+                                ,"heading"            
+                                ,"proximity_alert_radius"       
+                                ,"insert_time"
+                                ])
 
 def contact_df(message, pinned):
-    contact_item = message.json["pinned_message"]["contact"] if pinned else message.json["contact"]
-    return pd.DataFrame([[message.json['message_id']
+    if pinned:
+        contact_item = message.json["pinned_message"]["contact"]
+        phone_number = contact_item["phone_number"] if "phone_number" in contact_item else None
+        user_id = contact_item["user_id"] if "user_id" in contact_item else None
+        first_name = contact_item["first_name"] if "first_name" in contact_item else None
+        last_name = contact_item["last_name"] if "last_name" in contact_item else None
+        vcard = contact_item["vcard"] if "vcard" in contact_item else None
+
+        return pd.DataFrame([[message.json['message_id']
                               ,message.json["chat"]["id"]
-                              ,contact_item["phone_number"]
-                              ,contact_item["user_id"]
-                              ,contact_item["first_name"]
-                              ,contact_item["last_name"]
-                              ,contact_item["vcard"]
-                              ,pd.Timestamp.utcnow()  
+                              ,phone_number
+                              ,user_id
+                              ,first_name
+                              ,last_name
+                              ,vcard
+                              ,pd.Timestamp.utcnow()   
                         ]]
                         ,columns = [
-                              "message_id"
-                              ,"chat_id"
-                              ,"contact_phone_number"
-                              ,"contact_user_id"  
-                              ,"contact_first_name"           
-                              ,"contact_last_name"
-                              ,"contact_vcard"       
-                              ,"insert_time"
+                            "message_id"
+                                ,"chat_id"
+                                ,"contact_phone_number"
+                                ,"contact_user_id"  
+                                ,"contact_first_name"           
+                                ,"contact_last_name"
+                                ,"contact_vcard"       
+                                ,"insert_time"
                              ])
+    
+    else:
+        return pd.DataFrame([[message.json['message_id']
+                                ,message.json["chat"]["id"]
+                                ,message.contact.phone_number
+                                ,message.contact.user_id
+                                ,message.contact.first_name
+                                ,message.contact.last_name
+                                ,message.contact.vcard
+                                ,pd.Timestamp.utcnow()  
+                            ]]
+                            ,columns = [
+                                "message_id"
+                                ,"chat_id"
+                                ,"contact_phone_number"
+                                ,"contact_user_id"  
+                                ,"contact_first_name"           
+                                ,"contact_last_name"
+                                ,"contact_vcard"       
+                                ,"insert_time"
+                                ])
 
 def error_df(message, step, step_nbr, **kwargs):
     extraoption = kwargs.get("error_message", None)

@@ -4,10 +4,11 @@ CREATE TABLE `message_locations` (
   `chat_id` bigint NOT NULL,
   `latitude` double DEFAULT NULL,
   `longitude` double DEFAULT NULL,
-  `horizontal_accuracy` text,
-  `live_period` text,
-  `heading` text,
-  `proximity_alert_radius` text,
+  `horizontal_accuracy` double DEFAULT NULL,
+  `live_period` bigint DEFAULT NULL,
+  `heading` varchar(100) DEFAULT NULL,
+  `proximity_alert_radius` varchar(100) DEFAULT NULL,
   `insert_time` datetime NOT NULL,
-  PRIMARY KEY (`ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+  PRIMARY KEY (`chat_id`,`message_id`),
+  KEY `id_index` (`ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
