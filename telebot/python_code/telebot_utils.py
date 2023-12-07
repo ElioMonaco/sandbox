@@ -154,7 +154,7 @@ def message_df(message, pinned):
                                     ,"message_timestamp"
                                     ,"insert_time"
                                 ])
-            
+
     if "text" in message.json:
         text_item = message.json["text"] 
     elif pinned and "text" in message.json["pinned_message"]:
@@ -163,6 +163,8 @@ def message_df(message, pinned):
         text_item = message.json["new_chat_title"] 
     elif "caption" in message.json:
         text_item = message.json["caption"] 
+    elif pinned and "caption" in message.json["pinned_message"]:
+        text_item = message.json["pinned_message"]["caption"] 
     else: 
         text_item = None
     first_df.insert(5, "text", text_item, True)
@@ -189,9 +191,7 @@ def photo_df(message, pinned):
     first_df = pd.DataFrame.from_dict(photo_item, orient = "columns")
     first_df.insert(0, "message_id", [message.json["message_id"] for i in range(len(photo_item))], True)
     first_df.insert(1, "chat_id", [message.json["chat"]["id"] for i in range(len(photo_item))], True)
-    caption = message.json["caption"] if "caption" in message.json else None
-    first_df.insert(2, "caption", [caption for i in range(len(photo_item))], True)
-    first_df.insert(7, "insert_time", [pd.Timestamp.utcnow() for i in range(len(photo_item))], True)
+    first_df.insert(6, "insert_time", [pd.Timestamp.utcnow() for i in range(len(photo_item))], True)
     return first_df
 
 def poll_df(message, pinned):
@@ -275,55 +275,116 @@ def video_df(message, pinned):
                             ])
 
 def sticker_df(message, pinned):
-    sticker_item = message.json["pinned_message"]["sticker"] if pinned else message.json["sticker"]
-    return pd.DataFrame([[message.json['message_id']
-                            ,message.json["chat"]["id"]
-                            ,sticker_item["file_id"]
-                            ,sticker_item["file_unique_id"]
-                            ,sticker_item["type"]
-                            ,sticker_item["width"]
-                            ,sticker_item["height"]
-                            ,sticker_item["is_animated"]
-                            ,sticker_item["is_video"]
-                            ,sticker_item["emoji"]
-                            ,sticker_item["set_name"]
-                            ,sticker_item["mask_position"]
-                            ,sticker_item["file_size"]
-                            ,sticker_item["premium_animation"]
-                            ,sticker_item["custom_emoji_id"]
-                            ,sticker_item["needs_repainting"]
-                            ,pd.Timestamp.utcnow()  
-                      ]]
-                      ,columns = [
-                          "message_id"
-                            ,"chat_id"
-                            ,"file_id"           
-                            ,"file_unique_id"    
-                            ,"type"              
-                            ,"width"             
-                            ,"height"            
-                            ,"is_animated"       
-                            ,"is_video"          
-                            ,"emoji"             
-                            ,"set_name"          
-                            ,"mask_position"     
-                            ,"file_size"         
-                            ,"premium_animation" 
-                            ,"custom_emoji_id"   
-                            ,"needs_repainting"  
-                            ,"insert_time"
-                           ])
+
+    if pinned:
+
+        sticker_item = message.json["pinned_message"]["sticker"]
+        file_id = sticker_item["file_id"] if "file_id" in sticker_item else None
+        file_unique_id = sticker_item["file_unique_id"] if "file_unique_id" in sticker_item else None
+        sticker_type = sticker_item["type"] if "type" in sticker_item else None
+        width = sticker_item["width"] if "width" in sticker_item else None
+        height = sticker_item["height"] if "height" in sticker_item else None
+        is_animated = sticker_item["is_animated"] if "is_animated" in sticker_item else None
+        is_video = sticker_item["is_video"] if "is_video" in sticker_item else None
+        emoji = sticker_item["emoji"] if "emoji" in sticker_item else None
+        set_name = sticker_item["set_name"] if "set_name" in sticker_item else None
+        mask_position = sticker_item["mask_position"] if "mask_position" in sticker_item else None
+        file_size = sticker_item["file_size"] if "file_size" in sticker_item else None
+        premium_animation = sticker_item["premium_animation"] if "premium_animation" in sticker_item else None
+        custom_emoji_id = sticker_item["custom_emoji_id"] if "custom_emoji_id" in sticker_item else None
+        needs_repainting = sticker_item["needs_repainting"] if "needs_repainting" in sticker_item else None
+        return pd.DataFrame([[message.json['message_id']
+                                ,message.json["chat"]["id"]
+                                ,file_id
+                                ,file_unique_id
+                                ,sticker_type
+                                ,width
+                                ,height
+                                ,is_animated
+                                ,is_video
+                                ,emoji
+                                ,set_name
+                                ,mask_position
+                                ,file_size
+                                ,premium_animation
+                                ,custom_emoji_id
+                                ,needs_repainting
+                                ,pd.Timestamp.utcnow()  
+                        ]]
+                        ,columns = [
+                            "message_id"
+                                ,"chat_id"
+                                ,"file_id"           
+                                ,"file_unique_id"    
+                                ,"type"              
+                                ,"width"             
+                                ,"height"            
+                                ,"is_animated"       
+                                ,"is_video"          
+                                ,"emoji"             
+                                ,"set_name"          
+                                ,"mask_position"     
+                                ,"file_size"         
+                                ,"premium_animation" 
+                                ,"custom_emoji_id"   
+                                ,"needs_repainting"  
+                                ,"insert_time"
+                            ])
+    else:
+        return pd.DataFrame([[message.json['message_id']
+                                ,message.json["chat"]["id"]
+                                ,message.sticker.file_id
+                                ,message.sticker.file_unique_id
+                                ,message.sticker.type
+                                ,message.sticker.width
+                                ,message.sticker.height
+                                ,message.sticker.is_animated
+                                ,message.sticker.is_video
+                                ,message.sticker.emoji
+                                ,message.sticker.set_name
+                                ,message.sticker.mask_position
+                                ,message.sticker.file_size
+                                ,message.sticker.premium_animation
+                                ,message.sticker.custom_emoji_id
+                                ,message.sticker.needs_repainting
+                                ,pd.Timestamp.utcnow()  
+                        ]]
+                        ,columns = [
+                            "message_id"
+                                ,"chat_id"
+                                ,"file_id"           
+                                ,"file_unique_id"    
+                                ,"type"              
+                                ,"width"             
+                                ,"height"            
+                                ,"is_animated"       
+                                ,"is_video"          
+                                ,"emoji"             
+                                ,"set_name"          
+                                ,"mask_position"     
+                                ,"file_size"         
+                                ,"premium_animation" 
+                                ,"custom_emoji_id"   
+                                ,"needs_repainting"  
+                                ,"insert_time"
+                            ])
 
 def location_df(message, pinned):
-    location_item = message.json["pinned_message"]["location"] if pinned else message.json["location"]
-    return pd.DataFrame([[message.json["message_id"]
+    if pinned:
+        location_item = message.json["pinned_message"]["location"]
+        horizontal_accuracy = location_item["horizontal_accuracy"] if "horizontal_accuracy" in location_item else None
+        live_period = location_item["live_period"] if "live_period" in location_item else None
+        heading = location_item["heading"] if "heading" in location_item else None
+        proximity_alert_radius = location_item["proximity_alert_radius"] if "proximity_alert_radius" in location_item else None
+
+        return pd.DataFrame([[message.json['message_id']
                               ,message.json["chat"]["id"]
                               ,location_item["latitude"]
                               ,location_item["longitude"]
-                              ,location_item["horizontal_accuracy"]
-                              ,location_item["live_period"]
-                              ,location_item["heading"]
-                              ,location_item["proximity_alert_radius"]
+                              ,horizontal_accuracy
+                              ,live_period
+                              ,heading
+                              ,proximity_alert_radius
                               ,pd.Timestamp.utcnow()  
                         ]]
                         ,columns = [
@@ -337,28 +398,79 @@ def location_df(message, pinned):
                               ,"proximity_alert_radius"       
                               ,"insert_time"
                              ])
+    
+    else:
+        return pd.DataFrame([[message.json['message_id']
+                                ,message.json["chat"]["id"]
+                                ,message.location.latitude
+                                ,message.location.longitude
+                                ,message.location.horizontal_accuracy
+                                ,message.location.live_period
+                                ,message.location.heading
+                                ,message.location.proximity_alert_radius
+                                ,pd.Timestamp.utcnow()  
+                            ]]
+                            ,columns = [
+                                "message_id"
+                                ,"chat_id"
+                                ,"latitude"           
+                                ,"longitude"    
+                                ,"horizontal_accuracy"              
+                                ,"live_period"             
+                                ,"heading"            
+                                ,"proximity_alert_radius"       
+                                ,"insert_time"
+                                ])
 
 def contact_df(message, pinned):
-    contact_item = message.json["pinned_message"]["contact"] if pinned else message.json["contact"]
-    return pd.DataFrame([[message.json['message_id']
+    if pinned:
+        contact_item = message.json["pinned_message"]["contact"]
+        phone_number = contact_item["phone_number"] if "phone_number" in contact_item else None
+        user_id = contact_item["user_id"] if "user_id" in contact_item else None
+        first_name = contact_item["first_name"] if "first_name" in contact_item else None
+        last_name = contact_item["last_name"] if "last_name" in contact_item else None
+        vcard = contact_item["vcard"] if "vcard" in contact_item else None
+
+        return pd.DataFrame([[message.json['message_id']
                               ,message.json["chat"]["id"]
-                              ,contact_item["phone_number"]
-                              ,contact_item["user_id"]
-                              ,contact_item["first_name"]
-                              ,contact_item["last_name"]
-                              ,contact_item["vcard"]
-                              ,pd.Timestamp.utcnow()  
+                              ,phone_number
+                              ,user_id
+                              ,first_name
+                              ,last_name
+                              ,vcard
+                              ,pd.Timestamp.utcnow()   
                         ]]
                         ,columns = [
-                              "message_id"
-                              ,"chat_id"
-                              ,"contact_phone_number"
-                              ,"contact_user_id"  
-                              ,"contact_first_name"           
-                              ,"contact_last_name"
-                              ,"contact_vcard"       
-                              ,"insert_time"
+                            "message_id"
+                                ,"chat_id"
+                                ,"contact_phone_number"
+                                ,"contact_user_id"  
+                                ,"contact_first_name"           
+                                ,"contact_last_name"
+                                ,"contact_vcard"       
+                                ,"insert_time"
                              ])
+    
+    else:
+        return pd.DataFrame([[message.json['message_id']
+                                ,message.json["chat"]["id"]
+                                ,message.contact.phone_number
+                                ,message.contact.user_id
+                                ,message.contact.first_name
+                                ,message.contact.last_name
+                                ,message.contact.vcard
+                                ,pd.Timestamp.utcnow()  
+                            ]]
+                            ,columns = [
+                                "message_id"
+                                ,"chat_id"
+                                ,"contact_phone_number"
+                                ,"contact_user_id"  
+                                ,"contact_first_name"           
+                                ,"contact_last_name"
+                                ,"contact_vcard"       
+                                ,"insert_time"
+                                ])
 
 def error_df(message, step, step_nbr, **kwargs):
     extraoption = kwargs.get("error_message", None)
