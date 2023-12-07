@@ -154,7 +154,7 @@ def message_df(message, pinned):
                                     ,"message_timestamp"
                                     ,"insert_time"
                                 ])
-            
+
     if "text" in message.json:
         text_item = message.json["text"] 
     elif pinned and "text" in message.json["pinned_message"]:
@@ -163,7 +163,7 @@ def message_df(message, pinned):
         text_item = message.json["new_chat_title"] 
     elif "caption" in message.json:
         text_item = message.json["caption"] 
-    elif "caption" in message.json["pinned_message"]:
+    elif pinned and "caption" in message.json["pinned_message"]:
         text_item = message.json["pinned_message"]["caption"] 
     else: 
         text_item = None
@@ -275,44 +275,99 @@ def video_df(message, pinned):
                             ])
 
 def sticker_df(message, pinned):
-    sticker_item = message.json["pinned_message"]["sticker"] if pinned else message.json["sticker"]
-    return pd.DataFrame([[message.json['message_id']
-                            ,message.json["chat"]["id"]
-                            ,sticker_item["file_id"]
-                            ,sticker_item["file_unique_id"]
-                            ,sticker_item["type"]
-                            ,sticker_item["width"]
-                            ,sticker_item["height"]
-                            ,sticker_item["is_animated"]
-                            ,sticker_item["is_video"]
-                            ,sticker_item["emoji"]
-                            ,sticker_item["set_name"]
-                            ,sticker_item["mask_position"]
-                            ,sticker_item["file_size"]
-                            ,sticker_item["premium_animation"]
-                            ,sticker_item["custom_emoji_id"]
-                            ,sticker_item["needs_repainting"]
-                            ,pd.Timestamp.utcnow()  
-                      ]]
-                      ,columns = [
-                          "message_id"
-                            ,"chat_id"
-                            ,"file_id"           
-                            ,"file_unique_id"    
-                            ,"type"              
-                            ,"width"             
-                            ,"height"            
-                            ,"is_animated"       
-                            ,"is_video"          
-                            ,"emoji"             
-                            ,"set_name"          
-                            ,"mask_position"     
-                            ,"file_size"         
-                            ,"premium_animation" 
-                            ,"custom_emoji_id"   
-                            ,"needs_repainting"  
-                            ,"insert_time"
-                           ])
+
+    if pinned:
+
+        sticker_item = message.json["pinned_message"]["sticker"]
+        file_id = sticker_item["file_id"] if "file_id" in sticker_item else None
+        file_unique_id = sticker_item["file_unique_id"] if "file_unique_id" in sticker_item else None
+        sticker_type = sticker_item["type"] if "type" in sticker_item else None
+        width = sticker_item["width"] if "width" in sticker_item else None
+        height = sticker_item["height"] if "height" in sticker_item else None
+        is_animated = sticker_item["is_animated"] if "is_animated" in sticker_item else None
+        is_video = sticker_item["is_video"] if "is_video" in sticker_item else None
+        emoji = sticker_item["emoji"] if "emoji" in sticker_item else None
+        set_name = sticker_item["set_name"] if "set_name" in sticker_item else None
+        mask_position = sticker_item["mask_position"] if "mask_position" in sticker_item else None
+        file_size = sticker_item["file_size"] if "file_size" in sticker_item else None
+        premium_animation = sticker_item["premium_animation"] if "premium_animation" in sticker_item else None
+        custom_emoji_id = sticker_item["custom_emoji_id"] if "custom_emoji_id" in sticker_item else None
+        needs_repainting = sticker_item["needs_repainting"] if "needs_repainting" in sticker_item else None
+        return pd.DataFrame([[message.json['message_id']
+                                ,message.json["chat"]["id"]
+                                ,file_id
+                                ,file_unique_id
+                                ,sticker_type
+                                ,width
+                                ,height
+                                ,is_animated
+                                ,is_video
+                                ,emoji
+                                ,set_name
+                                ,mask_position
+                                ,file_size
+                                ,premium_animation
+                                ,custom_emoji_id
+                                ,needs_repainting
+                                ,pd.Timestamp.utcnow()  
+                        ]]
+                        ,columns = [
+                            "message_id"
+                                ,"chat_id"
+                                ,"file_id"           
+                                ,"file_unique_id"    
+                                ,"type"              
+                                ,"width"             
+                                ,"height"            
+                                ,"is_animated"       
+                                ,"is_video"          
+                                ,"emoji"             
+                                ,"set_name"          
+                                ,"mask_position"     
+                                ,"file_size"         
+                                ,"premium_animation" 
+                                ,"custom_emoji_id"   
+                                ,"needs_repainting"  
+                                ,"insert_time"
+                            ])
+    else:
+        return pd.DataFrame([[message.json['message_id']
+                                ,message.json["chat"]["id"]
+                                ,message.sticker.file_id
+                                ,message.sticker.file_unique_id
+                                ,message.sticker.type
+                                ,message.sticker.width
+                                ,message.sticker.height
+                                ,message.sticker.is_animated
+                                ,message.sticker.is_video
+                                ,message.sticker.emoji
+                                ,message.sticker.set_name
+                                ,message.sticker.mask_position
+                                ,message.sticker.file_size
+                                ,message.sticker.premium_animation
+                                ,message.sticker.custom_emoji_id
+                                ,message.sticker.needs_repainting
+                                ,pd.Timestamp.utcnow()  
+                        ]]
+                        ,columns = [
+                            "message_id"
+                                ,"chat_id"
+                                ,"file_id"           
+                                ,"file_unique_id"    
+                                ,"type"              
+                                ,"width"             
+                                ,"height"            
+                                ,"is_animated"       
+                                ,"is_video"          
+                                ,"emoji"             
+                                ,"set_name"          
+                                ,"mask_position"     
+                                ,"file_size"         
+                                ,"premium_animation" 
+                                ,"custom_emoji_id"   
+                                ,"needs_repainting"  
+                                ,"insert_time"
+                            ])
 
 def location_df(message, pinned):
     if pinned:
