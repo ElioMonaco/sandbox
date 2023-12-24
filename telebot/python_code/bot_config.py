@@ -1,21 +1,21 @@
-user_db = "************************"
-passw_db = "************************"
-host_db =  'localhost'
-port_db = 3306
-schema_db = 'telegram'
-jack = "************************"
-jaden = "************************"
+user_db_mysql = 'root'
+passw_db_mysql = "************************"
+host_db_mysql =  'localhost'
+port_db_mysql = 0
+schema_db_mysql = 'telegram'
+jack_frocio = "************************"
+jaden_picio = "************************"
 general_purpose = "************************"
-bkp_mysql = "E:\\MySQL"
-mysql_data_location = "C:\\ProgramData\\MySQL\\MySQL Server 8.0\\Data"
-logs_data_location = "E:\\MySQL\\GPbot_logs"
+bkp_mysql = "************************"
+mysql_data_location = "************************"
+logs_data_location = "************************"
 target_user = [
     "jackinyellow"
     ,"gweiffin"
     ,"The_Bias"
         ]
 chat = {
-    "************************": "************************"
+    000000000000000000 : "************************"
 }
 messages = {
     "command_messages": {

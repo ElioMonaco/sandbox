@@ -12,9 +12,10 @@ from re import search
 import pandas as pd
 from bot_config import *
 import zipfile 
+from time import sleep
 
-def define_connector(user, passw, host, port, schema):
-    connection_string = 'mysql://'+str(user)+':'+str(passw)+'@'+str(host)+':'+str(port)+'/'+str(schema)
+def define_connector(server_type, user, passw, host, port, schema):
+    connection_string = str(server_type) + '://'+str(user)+':'+str(passw)+'@'+str(host)+':'+str(port)+'/'+str(schema)
     print("connecting to:", connection_string)
     return create_engine(connection_string, echo=False)
 
@@ -616,7 +617,7 @@ def backup_database(db_host, db_user, db_passwd, db_name, bkp_path, time_name_fo
         f.close()
         
     else:
-        f.write("["+str(pd.Timestamp.now())+f"could not find the requested database '{db_name}'")
+        f.write("["+str(pd.Timestamp.now())+f"]: could not find the requested database '{db_name}' under path '" + source + "'\n")
         f.write("=====================================================================================================\n")
         f.close()
 
