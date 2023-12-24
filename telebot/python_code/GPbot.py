@@ -1,6 +1,6 @@
 from telebot_utils import *
 
-sql_engine = define_connector(user_db, passw_db, host_db, port_db, schema_db)
+sql_engine = define_connector("mysql", user_db_mysql, passw_db_mysql, host_db_mysql, port_db_mysql, schema_db_mysql)
 bot = telebot.TeleBot(general_purpose)
 commands = list(messages["command_messages"].keys())
 dataframe_types = pd.read_sql('SELECT * FROM telegram.message_types', sql_engine)
@@ -139,6 +139,8 @@ def send_welcome(message):
             f.write("["+str(pd.Timestamp.now())+"]: done\n")
             f.write("=====================================================================================================\n")
             f.close()
+
+            sleep(3)
         
 @bot.message_handler(content_types = message_types)
 def scrape_message(message):
@@ -227,10 +229,12 @@ def scrape_message(message):
             f.write("=====================================================================================================\n")
             f.close()
 
-backup_database(db_host = host_db
-                ,db_user = user_db
-                ,db_passwd = passw_db
-                ,db_name = schema_db
+            sleep(3)
+
+backup_database(db_host = host_db_mysql
+                ,db_user = user_db_mysql
+                ,db_passwd = passw_db_mysql
+                ,db_name = schema_db_mysql
                 ,bkp_path = bkp_mysql
                 ,time_name_format = "%Y%m%d-%H%M%S"
                 ,source = mysql_data_location,
