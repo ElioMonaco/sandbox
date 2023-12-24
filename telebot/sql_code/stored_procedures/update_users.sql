@@ -10,9 +10,9 @@ BEGIN
         FROM telegram.users
         WHERE valid_to IS NULL
     ) AS u
-    ON s.user_id = u.user_id
-    WHERE s.original_chat_id <> u.original_chat_id
-        OR COALESCE(s.is_bot, 0) <> COALESCE(u.is_bot, 0)
+    ON s.user_id = u.user_id 
+        AND s.original_chat_id = u.original_chat_id
+    WHERE COALESCE(s.is_bot, 0) <> COALESCE(u.is_bot, 0)
         OR COALESCE(s.first_name, '') <> COALESCE(u.first_name, '')
         OR COALESCE(s.username, '') <> COALESCE(u.username, '')
         OR COALESCE(s.last_name, '') <> COALESCE(u.last_name, '')
