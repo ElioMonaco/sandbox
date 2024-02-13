@@ -1,8 +1,7 @@
-#https://www.youtube.com/watch?v=P_SIZDsI3Ro
-
 import json
 import websocket
 import uuid
+from itertools import product
 from time import sleep
 import pandas as pd
 import mysql.connector
@@ -10,12 +9,10 @@ from sqlalchemy import create_engine, func
 
 
 def on_message(ws, message):
-    global mydf
-    message = json.loads(message)
-    mydf = to_dataframe(message)
-    #print(mydf)
-    mydf.to_sql(name = "currency_events", con = sql_engine, if_exists = 'append', index = False)
-    sleep(300)
+    new_message = json.loads(message)
+    if bool(new_message["data"]["k"]["x"]):
+        mydf = to_dataframe(new_message)
+        mydf.to_sql(name = "currency_events", con = sql_engine, if_exists = 'append', index = False)
 
 def to_dataframe(source):
     dict = {}
@@ -48,9 +45,10 @@ def define_connector(server_type, user, passw, host, port, schema):
     print("connecting to:", connection_string)
     return create_engine(connection_string, echo=False)
 
-symbol = "BTCUSDT"
-asset = symbol.lower() + "@kline_5m"
-socket = "wss://stream.binance.com:9443/stream?streams=" + asset
+symbols = ["BTCUSDT"]
+kandles = ["@kline_1m","@kline_30m","@kline_1h"]
+assets = "/".join(list(map("".join,product([item.lower() for item in symbols], kandles))))
+socket = "wss://stream.binance.com:9443/stream?streams=" + assets
 ws = websocket.WebSocketApp(socket, on_message = on_message)
 user_db_mysql = 'root'
 passw_db_mysql = '*****************'
@@ -58,6 +56,7 @@ host_db_mysql =  'localhost'
 port_db_mysql = 0
 schema_db_mysql = 'crypto'
 sql_engine = define_connector("mysql", user_db_mysql, passw_db_mysql, host_db_mysql, port_db_mysql, schema_db_mysql)
+
 
 while True:
     ws.run_forever()
