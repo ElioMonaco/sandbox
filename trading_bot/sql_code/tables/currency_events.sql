@@ -23,5 +23,6 @@ CREATE TABLE `currency_events` (
   `InsertTimestamp` datetime NOT NULL,
   PRIMARY KEY (`TransactionId`),
   KEY `id_index` (`ID`),
-  KEY `EventTimestamp_index` (`EventTimestamp`)
+  KEY `EventTimestamp_index` (`EventTimestamp`),
+  KEY `Stream_index` (`Stream`)
 ) ENGINE=InnoDB AUTO_INCREMENT=21539 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_520_ci
