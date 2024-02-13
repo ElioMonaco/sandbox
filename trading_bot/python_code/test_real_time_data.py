@@ -58,3 +58,6 @@ host_db_mysql =  'localhost'
 port_db_mysql = 0
 schema_db_mysql = 'crypto'
 sql_engine = define_connector("mysql", user_db_mysql, passw_db_mysql, host_db_mysql, port_db_mysql, schema_db_mysql)
+
+while True:
+    ws.run_forever()
