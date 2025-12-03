@@ -3,6 +3,19 @@ import requests
 import json
 from pandasql import sqldf
 import os
+from time import sleep
+from sqlalchemy import create_engine
+
+def get_sql_engine(driver):
+    DB_USER = os.getenv("DB_USER")
+    DB_PASSWORD = os.getenv("DB_PASSWORD")
+    DB_HOST = os.getenv("DB_HOST", "localhost")
+    DB_PORT = os.getenv("DB_PORT", 5432)
+    DB_NAME = os.getenv("DB_NAME")
+
+    return create_engine(
+        f"{driver}://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+    )
 
 def get_items_by_collection(coll_name, headers):
     coll_df = pd.DataFrame(
